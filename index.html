@@ -118,7 +118,7 @@
             z-index: 20;
         }
         
-        /* Nuevo CSS para el botón de créditos */
+        /* CSS para el botón de créditos */
         #credits-container {
             position: absolute;
             bottom: 20px;
@@ -176,6 +176,56 @@
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
+
+        /* Aviso para girar el celular en modo retrato */
+        #landscape-warning {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: rgba(5, 5, 5, 0.95);
+            z-index: 999999;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+            box-sizing: border-box;
+            color: #39ff14;
+            pointer-events: all;
+        }
+        #landscape-warning h2 {
+            font-size: 28px;
+            margin-bottom: 10px;
+            text-shadow: 0 0 15px #39ff14;
+            text-transform: uppercase;
+        }
+        #landscape-warning p {
+            font-size: 16px;
+            background: none;
+            border: none;
+            max-width: 80%;
+        }
+        .rotate-icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+            animation: rotatePhone 2s infinite ease-in-out;
+            display: inline-block;
+        }
+        @keyframes rotatePhone {
+            0% { transform: rotate(0deg); }
+            50% { transform: rotate(-90deg); }
+            100% { transform: rotate(-90deg); }
+        }
+
+        /* Se activa solo en pantallas pequeñas con orientación vertical */
+        @media screen and (orientation: portrait) and (max-width: 800px) {
+            #landscape-warning {
+                display: flex;
+            }
+        }
     </style>
     <!-- Librerías Core -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -184,6 +234,13 @@
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
 </head>
 <body>
+
+    <!-- Aviso de orientación para celulares -->
+    <div id="landscape-warning">
+        <div class="rotate-icon">📱</div>
+        <h2>¡Gira tu celular!</h2>
+        <p>Para disfrutar al máximo del Omnitrix, por favor pon tu dispositivo en modo horizontal.</p>
+    </div>
 
     <div id="ui-overlay">
         <h1>Omnitrix Clásico</h1>
