@@ -584,10 +584,12 @@
             textoAlien.innerText = nombresAliens[alienSeleccionado];
 
             isAnimating = true;
-            gsap.to(dialGroup.rotation, { y: dialGroup.rotation.y - (dir * Math.PI / 5), duration: 0.3, ease: "power2.out", onComplete: () => { isAnimating = false; }});
+            // Cambiamos el signo negativo por uno positivo para invertir el giro
+            gsap.to(dialGroup.rotation, { y: dialGroup.rotation.y + (dir * Math.PI / 5), duration: 0.3, ease: "power2.out", onComplete: () => { isAnimating = false; }});
 
             if(modeloUsuario && dialUsuario) {
-                gsap.to(dialUsuario.rotation, { y: dialUsuario.rotation.y - (dir * Math.PI / 5), duration: 0.3, ease: "power2.out" });
+                // Hacemos lo mismo para tu modelo importado
+                gsap.to(dialUsuario.rotation, { y: dialUsuario.rotation.y + (dir * Math.PI / 5), duration: 0.3, ease: "power2.out" });
             }
         }
 
