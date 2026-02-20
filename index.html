@@ -712,8 +712,12 @@
                     gsap.to(dialUsuario.position, { y: 0.741, duration: 0.15, ease: "power4.in" });
                 }
 
+                // Destello Verde original de transformación
+                flashOverlay.style.backgroundColor = '#39ff14';
                 flashOverlay.style.opacity = 1;
                 gsap.to(flashOverlay, { opacity: 0, duration: 1.5, delay: 0.1, ease: "power2.out" });
+                
+                omniLight.color.setHex(0x39ff14);
                 omniLight.intensity = 15;
                 gsap.to(omniLight, { intensity: 0, duration: 1.5 });
 
@@ -726,7 +730,16 @@
             
             // 1. Poner todo en rojo inmediatamente
             placaMat.map = texRelojRojo; matVerdeNeon.color.setHex(0xff0000); matVerdeNeon.emissive.setHex(0xff0000);
-            matCoreLateral.emissive.setHex(0xff0000); omniLight.color.setHex(0xff0000); flashOverlay.style.backgroundColor = '#ff0000';
+            matCoreLateral.emissive.setHex(0xff0000); 
+
+            // 💥 NUEVO: Destello rojo de sobrecarga en la pantalla y la luz omni
+            flashOverlay.style.backgroundColor = '#ff0000';
+            flashOverlay.style.opacity = 1;
+            gsap.to(flashOverlay, { opacity: 0, duration: 1.5, delay: 0.1, ease: "power2.out" });
+            
+            omniLight.color.setHex(0xff0000);
+            omniLight.intensity = 15;
+            gsap.to(omniLight, { intensity: 0, duration: 1.5 });
 
             materialesDinamicos.forEach(m => {
                 if (m.mat.color) m.mat.color.setHex(0xff0000);
