@@ -117,6 +117,65 @@
             pointer-events: auto;
             z-index: 20;
         }
+        
+        /* Nuevo CSS para el botón de créditos */
+        #credits-container {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            z-index: 50;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 10px;
+            pointer-events: auto;
+        }
+        #credits-btn {
+            background-color: #111;
+            color: #39ff14;
+            border: 1px solid #39ff14;
+            padding: 8px 16px;
+            font-size: 14px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Courier New', Courier, monospace;
+            transition: all 0.2s;
+        }
+        #credits-btn:hover {
+            background-color: #39ff14;
+            color: #000;
+            box-shadow: 0 0 15px rgba(57, 255, 20, 0.6);
+        }
+        #credits-panel {
+            background: rgba(0, 0, 0, 0.85);
+            border: 1px solid #39ff14;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 14px;
+            text-align: right;
+            display: none;
+            box-shadow: 0 0 10px rgba(57, 255, 20, 0.2);
+            color: white;
+        }
+        #credits-panel.show {
+            display: block !important;
+            animation: fadeIn 0.3s ease;
+        }
+        #credits-panel a {
+            color: #39ff14;
+            text-decoration: none;
+            font-weight: bold;
+            display: inline-block;
+            margin-top: 8px;
+        }
+        #credits-panel a:hover {
+            text-decoration: underline;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
     </style>
     <!-- Librerías Core -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -136,6 +195,14 @@
         <button id="btn-left">◀ Alien</button>
         <button id="btn-action">Activar</button>
         <button id="btn-right">Alien ▶</button>
+    </div>
+
+    <div id="credits-container" style="z-index: 9999;">
+        <div id="credits-panel">
+            Hecho por <strong>Federico Cámara</strong><br>
+            <a href="https://github.com/FedericoGamer15/omnitrix" target="_blank">🔗 Ver en GitHub</a>
+        </div>
+        <button id="credits-btn" onclick="document.getElementById('credits-panel').classList.toggle('show'); event.stopPropagation();">[Creador]</button>
     </div>
 
     <div id="flash-overlay"></div>
@@ -591,7 +658,7 @@
                 omniLight.intensity = 15;
                 gsap.to(omniLight, { intensity: 0, duration: 1.5 });
 
-                setTimeout(iniciarRecarga, 60000); // Esto es cuánto tiempo estás convertido en Alien (60 segundos)
+                setTimeout(iniciarRecarga, 5000); // Esto es cuánto tiempo estás convertido en Alien (5 segundos)
             }
         }
 
