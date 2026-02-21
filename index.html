@@ -1142,12 +1142,18 @@
             AlturaPantallaAlien = parseFloat(document.getElementById('slider-y').value);
             TamanoPantallaAlien = parseFloat(document.getElementById('slider-s').value);
             OpacidadHolograma = parseFloat(document.getElementById('slider-o').value);
+            
+            IntensidadAmbiente = parseFloat(document.getElementById('slider-l-amb').value);
+            IntensidadDireccional = parseFloat(document.getElementById('slider-l-dir').value);
 
             document.getElementById('val-x').innerText = DesplazamientoX.toFixed(2);
             document.getElementById('val-z').innerText = DesplazamientoZ.toFixed(2);
             document.getElementById('val-y').innerText = AlturaPantallaAlien.toFixed(2);
             document.getElementById('val-s').innerText = TamanoPantallaAlien.toFixed(2);
             document.getElementById('val-o').innerText = OpacidadHolograma.toFixed(2);
+            
+            document.getElementById('val-l-amb').innerText = IntensidadAmbiente.toFixed(2);
+            document.getElementById('val-l-dir').innerText = IntensidadDireccional.toFixed(2);
 
             if (pantallaAlien) {
                 pantallaAlien.position.set(DesplazamientoX, AlturaPantallaAlien, DesplazamientoZ);
@@ -1156,6 +1162,10 @@
                     pantallaMat.opacity = OpacidadHolograma;
                 }
             }
+
+            // Actualizar luces en tiempo real
+            if (ambientLight) ambientLight.intensity = IntensidadAmbiente;
+            if (dirLight) dirLight.intensity = IntensidadDireccional;
         };
 
         // Escuchar los deslizadores sin causar fallos
@@ -1164,6 +1174,8 @@
         document.getElementById('slider-y').addEventListener('input', updateHologramSettings);
         document.getElementById('slider-s').addEventListener('input', updateHologramSettings);
         document.getElementById('slider-o').addEventListener('input', updateHologramSettings);
+        document.getElementById('slider-l-amb').addEventListener('input', updateHologramSettings);
+        document.getElementById('slider-l-dir').addEventListener('input', updateHologramSettings);
 
 
         window.addEventListener('resize', () => {
@@ -1183,5 +1195,3 @@
     </script>
 </body>
 </html>
-
-
