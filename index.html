@@ -220,11 +220,53 @@
             100% { transform: rotate(-90deg); }
         }
 
-        /* Se activa solo en pantallas pequeñas con orientación vertical */
         @media screen and (orientation: portrait) and (max-width: 800px) {
             #landscape-warning {
                 display: flex;
             }
+        }
+
+        /* 🎬 CSS PARA LOS VIDEOS DE INTRODUCCIÓN 🎬 */
+        #intro-video-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: #000;
+            z-index: 2000000; /* Por encima de absolutamente todo */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        #intro-video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* Esto hace que se ajuste perfecto a PC y Mobile sin deformarse */
+            display: none; /* Oculto hasta que den clic en iniciar */
+        }
+        #btn-start-experience {
+            background-color: #111;
+            color: #39ff14;
+            border: 3px solid #39ff14;
+            padding: 20px 40px;
+            font-size: 24px;
+            font-weight: bold;
+            border-radius: 12px;
+            cursor: pointer;
+            text-transform: uppercase;
+            box-shadow: 0 0 20px rgba(57, 255, 20, 0.6);
+            font-family: 'Courier New', Courier, monospace;
+            letter-spacing: 2px;
+            transition: transform 0.2s, background-color 0.2s;
+        }
+        #btn-start-experience:hover {
+            background-color: #39ff14;
+            color: #000;
+        }
+        #btn-start-experience:active {
+            transform: scale(0.95);
         }
     </style>
     <!-- Librerías Core -->
@@ -234,6 +276,12 @@
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
 </head>
 <body>
+
+    <!-- 🎬 CONTENEDOR DE VIDEOS 🎬 -->
+    <div id="intro-video-container">
+        <button id="btn-start-experience">INICIAR EXPERIENCIA</button>
+        <video id="intro-video" playsinline></video>
+    </div>
 
     <!-- Aviso de orientación para celulares -->
     <div id="landscape-warning">
@@ -267,28 +315,83 @@
 
     <script>
         // ==========================================
+        // 🎬 CONFIGURACIÓN DE VIDEOS INICIALES 🎬
+        // ==========================================
+        const RutaVideoIntro = "cinematicas/ben-10-classic_intro.mp4"; // Pon aquí la ruta a la intro clásica
+        const RutaVideoObtencion = "cinematicas/ben-10-classic_obtain-the-omnitrix.mp4"; // Pon aquí la ruta de cuando obtiene el reloj
+
+        const introContainer = document.getElementById('intro-video-container');
+        const introVideo = document.getElementById('intro-video');
+        const btnStartExp = document.getElementById('btn-start-experience');
+
+        // Si hay videos configurados, activamos la secuencia
+        if (RutaVideoIntro && RutaVideoIntro.trim() !== "") {
+            let videoActual = 1;
+
+            btnStartExp.addEventListener('click', () => {
+                btnStartExp.style.display = 'none'; // Ocultar botón
+                introVideo.style.display = 'block'; // Mostrar video
+                introVideo.src = RutaVideoIntro;
+                introVideo.play().catch(e => console.log("Error al reproducir video:", e));
+            });
+
+            introVideo.addEventListener('ended', () => {
+                if (videoActual === 1 && RutaVideoObtencion && RutaVideoObtencion.trim() !== "") {
+                    // Terminó la intro, pasamos al video 2
+                    videoActual = 2;
+                    introVideo.src = RutaVideoObtencion;
+                    introVideo.play().catch(e => console.log("Error al reproducir segundo video:", e));
+                } else {
+                    // Terminó toda la secuencia, ocultamos la pantalla negra y mostramos el 3D
+                    introContainer.style.display = 'none';
+                    introVideo.src = ""; // Liberar memoria
+                }
+            });
+        } else {
+            // Si no configuras videos, desaparece la pantalla negra al instante
+            introContainer.style.display = 'none';
+        }
+
+
+        // ==========================================
         // ⚙️ CONFIGURACIÓN DE MODELO Y SONIDOS
         // ==========================================
         // 🛑 PON AQUÍ LA RUTA DE TU MODELO .GLB O .GLTF 🛑
-        const RutaModeloGLB = "classic_omnitrix.glb"; // Reemplaza con tu ruta, ej: "modelos/omnitrix.glb"
+        const RutaModeloGLB = "classic_omnitrix.glb"; 
+        
+        // 🟢 AJUSTES DE LA PANTALLA DEL ALIEN (Sincronización con el objeto discos_dial) 🟢
+        const AlturaPantallaAlien = 0.05; // Ajusta esto para que la imagen no flote ni se hunda en el discos_dial
+        const TamanoPantallaAlien = 2.0;  // Ajusta esto para agrandar o achicar las imágenes
+
+        // 🛸 PON AQUÍ LAS RUTAS DE TUS IMÁGENES PNG (Asegúrate de que sean transparentes) 🛸
+        const RutasAliens = [
+            "aliens/256x256/fuego.png",         // Alien 0
+            "aliens/256x256/bestia.png",        // Alien 1
+            "aliens/256x256/diamante.png",      // Alien 2
+            "aliens/256x256/xlr8.png",          // Alien 3
+            "aliens/256x256/materia_gris.png",  // Alien 4
+            "aliens/256x256/cuatro_brazos.png", // Alien 5
+            "aliens/256x256/insectoide.png",    // Alien 6
+            "aliens/256x256/acuatico.png",      // Alien 7
+            "aliens/256x256/ultra-t.png",       // Alien 8
+            "aliens/256x256/fantasmatico.png"   // Alien 9
+        ];
 
         const MisSonidos = {
             activar: "sonidos/omnitrix_activate.mp3", girarDial: "sonidos/omnitrix_girar-dial.mp3", transformacion: "sonidos/omnitrix_transform.mp3", desactivar: "sonidos/omnitrix_power-down.mp3", recarga: "sonidos/omnitrix_cargado.mp3", loopSeleccion: "sonidos/omnitrix_dial-loop.wav"
         };
+        
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         const audiosCargados = {};
-        const audioBuffers = {}; // Para loops perfectos sin delay
+        const audioBuffers = {}; 
 
         for (let clave in MisSonidos) {
             if (MisSonidos[clave]) {
-                // 1. Siempre creamos el respaldo clásico (HTML5 Audio). Funciona 100% offline.
                 const audio = new Audio(MisSonidos[clave]);
                 audio.preload = 'auto';
                 if (clave === 'loopSeleccion') audio.loop = true;
                 audiosCargados[clave] = audio;
 
-                // 2. Intentamos cargar el audio puro en memoria para el loop sin cortes.
-                // Nota: Esto fallará si se abre el HTML con doble clic (file://) por seguridad del navegador.
                 if (clave === 'loopSeleccion') {
                     fetch(MisSonidos[clave])
                         .then(response => response.arrayBuffer())
@@ -301,7 +404,6 @@
             }
         }
 
-        // Variables para controlar el sonido en bucle continuo
         let audioLoopRealBuffer = null;
         let audioLoopRealHTML = null;
         let nodoLoopSintetico = null;
@@ -330,7 +432,6 @@
         function reproducirSonido(tipo, callbackOnEnded = null) {
             if (audioCtx.state === 'suspended') audioCtx.resume();
             
-            // Lógica específica para el loop
             if (tipo === 'loopSeleccion') {
                 if (audioBuffers[tipo]) {
                     audioLoopRealBuffer = audioCtx.createBufferSource();
@@ -347,12 +448,10 @@
                 }
             }
 
-            // Para los demás sonidos personalizados que NO son el loop
             if (tipo !== 'loopSeleccion' && audiosCargados[tipo]) {
                 const audio = audiosCargados[tipo];
                 audio.currentTime = 0;
                 
-                // Si pasamos una función, la ejecuta exactamente al terminar el audio
                 if (callbackOnEnded) {
                     audio.onended = () => {
                         callbackOnEnded();
@@ -364,12 +463,11 @@
 
                 audio.play().catch(e => { 
                     console.log("Error:", e);
-                    if(callbackOnEnded) callbackOnEnded(); // Si hay error, lo ejecuta igual para no bloquear el flujo
+                    if(callbackOnEnded) callbackOnEnded(); 
                 });
                 return;
             }
 
-            // Sintetizador básico (Si no pusiste tus propios sonidos)
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
             osc.connect(gain); gain.connect(audioCtx.destination);
@@ -405,17 +503,39 @@
             osc.start(now); 
             if(duration > 0) osc.stop(now + duration);
 
-            // Avisar al callback si estamos usando el sintetizador fallback
             if (callbackOnEnded && duration > 0) {
                 setTimeout(callbackOnEnded, duration * 1000);
             }
         }
 
         // ==========================================
-        // TEXTURAS Y HOLOGRAMAS
+        // TEXTURAS Y PANTALLA 2D
         // ==========================================
         const colorVerde = '#39ff14';
         const nombresAliens = ["FUEGO", "BESTIA", "DIAMANTE", "XLR8", "MATERIA GRIS", "CUATRO BRAZOS", "INSECTOIDE", "ACUÁTICO", "ULTRA-T", "FANTASMÁTICO"];
+
+        // Cargador de texturas de Three.js
+        const textureLoader = new THREE.TextureLoader();
+        const texturasAliens = [];
+
+        function crearHologramaFallback() {
+            const canvas = document.createElement('canvas'); canvas.width = 256; canvas.height = 256; const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, 256, 256); ctx.strokeStyle = colorVerde; ctx.lineWidth = 10; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.translate(128, 128); 
+            ctx.beginPath(); const puntas = 5 + Math.floor(Math.random()*5);
+            for(let i=0; i<puntas; i++){ const angle = (i/puntas)*Math.PI*2; const r = 40+Math.random()*60; ctx.lineTo(Math.cos(angle)*r, Math.sin(angle)*r); }
+            ctx.closePath(); ctx.stroke(); ctx.shadowColor = colorVerde; ctx.shadowBlur = 20; ctx.stroke(); return new THREE.CanvasTexture(canvas);
+        }
+
+        // Cargar las imágenes del usuario o usar el holograma de respaldo si la ruta está vacía
+        for (let i = 0; i < 10; i++) {
+            if (RutasAliens[i] && RutasAliens[i].trim() !== "") {
+                const tex = textureLoader.load(RutasAliens[i]);
+                tex.encoding = THREE.sRGBEncoding; // Mantiene los colores fieles al PNG
+                texturasAliens.push(tex);
+            } else {
+                texturasAliens.push(crearHologramaFallback());
+            }
+        }
 
         function crearTexturaReloj(colorDial) {
             const canvas = document.createElement('canvas'); canvas.width = 512; canvas.height = 512; const ctx = canvas.getContext('2d');
@@ -470,6 +590,17 @@
         const omniLight = new THREE.PointLight(0x39ff14, 0, 35); omniLight.position.set(0, 5, 0); scene.add(omniLight);
 
         // ==========================================
+        // CREACIÓN DE LA PANTALLA 2D (Disco)
+        // ==========================================
+        const pantallaMat = new THREE.MeshBasicMaterial({ 
+            map: texturasAliens[0], transparent: true, opacity: 0, 
+            blending: THREE.AdditiveBlending, depthWrite: false, color: 0xffffff // color blanco para no teñir tus PNGs
+        });
+        const pantallaAlien = new THREE.Mesh(new THREE.CircleGeometry(1.5, 32), pantallaMat);
+        // Rotamos el disco para que quede acostado
+        pantallaAlien.rotation.x = -Math.PI / 2;
+
+        // ==========================================
         // GRUPOS Y MODELO PROCEDURAL
         // ==========================================
         const modeloPrincipalGroup = new THREE.Group();
@@ -477,7 +608,6 @@
         const omnitrixProcedural = new THREE.Group();
         modeloPrincipalGroup.add(omnitrixProcedural);
 
-        // Materiales y Modelado Procedural...
         const matCuerpo = new THREE.MeshStandardMaterial({ color: 0x1f1f1f, roughness: 0.8, metalness: 0.2 });
         const matBaseReloj = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.7, metalness: 0.4 });
         const matTubosBlancos = new THREE.MeshStandardMaterial({ color: 0xd0d0d0, roughness: 0.5, metalness: 0.1 });
@@ -511,17 +641,20 @@
         const placaFrontal = new THREE.Mesh(new THREE.CylinderGeometry(3.1, 3.1, 0.1, 64), placaMat);
         placaFrontal.position.y = 0.1; placaFrontal.rotation.y = Math.PI / 2; dialGroup.add(placaFrontal);
 
+        pantallaAlien.position.y = 0.16; 
+        dialGroup.add(pantallaAlien);
+
         // ==========================================
         // CARGA AUTOMÁTICA DE MODELO GLTF/GLB
         // ==========================================
         const loader = new THREE.GLTFLoader();
         let modeloUsuario = null;
         let dialUsuario = null;
+        let discoDialUsuario = null;
         let botonUsuario = null;
-        let materialesDinamicos = []; // Para guardar los colores originales de tu GLB
+        let materialesDinamicos = []; 
 
         if (RutaModeloGLB && RutaModeloGLB.trim() !== "") {
-            // Ocultar el viejo instantáneamente para evitar parpadeos
             omnitrixProcedural.visible = false; 
 
             loader.load(RutaModeloGLB, function(gltf) {
@@ -529,8 +662,9 @@
                 
                 modeloUsuario = gltf.scene;
                 dialUsuario = null;
+                discoDialUsuario = null;
                 botonUsuario = null;
-                materialesDinamicos = []; // Reiniciar colores dinámicos
+                materialesDinamicos = []; 
                 
                 const box = new THREE.Box3().setFromObject(modeloUsuario);
                 const size = box.getSize(new THREE.Vector3()).length();
@@ -540,18 +674,20 @@
                 modeloUsuario.scale.set(scale, scale, scale);
                 modeloUsuario.position.sub(center.multiplyScalar(scale)); 
 
-                // Recorrer y buscar usando .includes para evitar errores si el programa de 3D añade "_mesh", "1", etc.
                 modeloUsuario.traverse((child) => {
                     if (child.name) {
                         const nombre = child.name.toLowerCase();
                         
-                        // Capturar Dial (solo el primero que encuentre para no agarrar partes hijas equivocadas)
                         if (!dialUsuario && (nombre.includes('dial') || nombre.includes('nucleo'))) {
                             dialUsuario = child;
-                            dialUsuario.position.y = 0.741; // Posición base inicial que definiste
+                            dialUsuario.position.y = 0.741; 
+                        }
+
+                        // Buscamos específicamente el objeto 'discos_dial' para anclar la imagen ahí
+                        if (!discoDialUsuario && nombre.includes('discos_dial')) {
+                            discoDialUsuario = child;
                         }
                         
-                        // Capturar Botón Verde
                         if (!botonUsuario && nombre.includes('boton')) {
                             botonUsuario = child;
                             botonUsuario.userData.posInicial = botonUsuario.position.clone();
@@ -562,20 +698,17 @@
                         child.castShadow = true;
                         child.receiveShadow = true;
 
-                        // Detectar materiales verdes para cambiarlos a rojo en la recarga
                         if (child.material) {
                             const mat = child.material;
                             const c = mat.color;
                             const e = mat.emissive;
                             
-                            // Detectar si el material es predominantemente verde o se llama verde/glow/luz
                             const esVerde = 
                                 (c && c.g > c.r + 0.1 && c.g > c.b + 0.1) || 
                                 (e && e.g > e.r + 0.1 && e.g > e.b + 0.1) || 
                                 (mat.name && (mat.name.toLowerCase().includes('verd') || mat.name.toLowerCase().includes('green') || mat.name.toLowerCase().includes('glow') || mat.name.toLowerCase().includes('luz')));
 
                             if (esVerde) {
-                                // Evitar duplicados si el material se usa en varias mallas
                                 if (!materialesDinamicos.find(m => m.mat === mat)) {
                                     materialesDinamicos.push({
                                         mat: mat,
@@ -588,20 +721,26 @@
                     }
                 });
 
+                // Si encontramos 'discos_dial', pegamos la pantalla ahí. Si no, al dial principal.
+                if (discoDialUsuario) {
+                    discoDialUsuario.add(pantallaAlien);
+                    pantallaAlien.position.set(0, AlturaPantallaAlien, 0);
+                    pantallaAlien.scale.set(TamañoPantallaAlien, TamañoPantallaAlien, TamañoPantallaAlien);
+                } else if (dialUsuario) {
+                    dialUsuario.add(pantallaAlien);
+                    pantallaAlien.position.set(0, AlturaPantallaAlien, 0);
+                    pantallaAlien.scale.set(TamañoPantallaAlien, TamañoPantallaAlien, TamañoPantallaAlien);
+                }
+
                 modeloPrincipalGroup.add(modeloUsuario);
                 
-                // Avisar por consola el estado de las piezas
                 console.log("✅ Modelo 3D cargado con éxito desde:", RutaModeloGLB);
-                console.log(dialUsuario 
-                    ? "✅ Dial detectado correctamente." 
-                    : "❌ Dial NO detectado (Nombra el objeto 'dial' en tu programa 3D).");
-                console.log(botonUsuario 
-                    ? "✅ Botón detectado correctamente." 
-                    : "❌ Botón NO detectado (Nombra el objeto 'boton_verde' en tu programa 3D).");
+                console.log(dialUsuario ? "✅ Dial detectado." : "❌ Dial NO detectado.");
+                console.log(discoDialUsuario ? "✅ Discos_Dial detectado." : "❌ Discos_Dial NO detectado.");
+                console.log(botonUsuario ? "✅ Botón detectado." : "❌ Botón NO detectado.");
 
             }, undefined, function(error) {
                 console.error("❌ Error al cargar tu archivo .GLB:", error);
-                // Si falla la carga, volvemos a mostrar el modelo generado por código
                 omnitrixProcedural.visible = true;
             });
         }
@@ -641,13 +780,14 @@
             textoAlien.innerText = nombresAliens[alienSeleccionado];
 
             isAnimating = true;
-            // Cambiamos el signo negativo por uno positivo para invertir el giro
             gsap.to(dialGroup.rotation, { y: dialGroup.rotation.y + (dir * Math.PI / 5), duration: 0.3, ease: "power2.out", onComplete: () => { isAnimating = false; }});
 
             if(modeloUsuario && dialUsuario) {
-                // Hacemos lo mismo para tu modelo importado
                 gsap.to(dialUsuario.rotation, { y: dialUsuario.rotation.y + (dir * Math.PI / 5), duration: 0.3, ease: "power2.out" });
             }
+
+            // Cambiamos la textura de la pantalla física en el dial (Parpadea mientras giras)
+            gsap.to(pantallaMat, { opacity: 0, duration: 0.15, yoyo: true, repeat: 1, onRepeat: () => { pantallaMat.map = texturasAliens[alienSeleccionado]; }});
         }
 
         function toggleOmnitrix() {
@@ -657,17 +797,14 @@
                 isAnimating = true;
                 reproducirSonido('activar');
 
-                // Iniciar el sonido en bucle exactamente cuando se activa (el dial sube)
                 if (!isLooping) {
                     reproducirSonido('loopSeleccion');
                     isLooping = true;
                 }
                 
-                // Animación procedural
                 gsap.to(nucleoGroup.position, { y: 2.5, duration: 0.5, ease: "back.out(1.5)" });
                 
                 if(modeloUsuario) {
-                    // Animación Resorte Botón (Se empuja levemente en diagonal)
                     if (botonUsuario) {
                         gsap.to(botonUsuario.position, {
                             x: botonUsuario.userData.posInicial.x + 0.03,
@@ -679,60 +816,63 @@
                         });
                     }
 
-                    // Elevar el dial a la posición exacta 1.101
                     if (dialUsuario) {
                         gsap.to(dialUsuario.position, { y: 1.101, duration: 0.5, delay: 0.1, ease: "back.out(1.5)" });
                     }
                 }
 
-                gsap.to(omniLight, { 
-                    intensity: 1.5, 
-                    duration: 0.5, 
-                    onComplete: () => { 
-                        estadoActual = 'ACTIVO'; 
-                        isAnimating = false; 
-                        actualizarUI(); 
-                    }
-                });
+                gsap.to(omniLight, { intensity: 1.5, duration: 0.5 });
+                
+                // Mostrar la imagen del alien cuando se activa
+                gsap.to(pantallaMat, { opacity: 1, duration: 0.5, delay: 0.2, onComplete: () => { estadoActual = 'ACTIVO'; isAnimating = false; actualizarUI(); }});
 
             } else if (estadoActual === 'ACTIVO') {
                 isAnimating = true;
                 estadoActual = 'TRANSFORMADO';
                 
-                // Detener el sonido en bucle JUSTO antes de transformar
                 detenerSonidoLoop();
-                
                 actualizarUI();
                 reproducirSonido('transformacion');
 
+                // OJO AQUÍ: La bajada del núcleo dura 0.15 segundos
                 gsap.to(nucleoGroup.position, { y: 0.5, duration: 0.15, ease: "power4.in" });
                 
                 if(modeloUsuario && dialUsuario) {
-                    // Bajar a la posición exacta 0.741
-                    gsap.to(dialUsuario.position, { y: 0.741, duration: 0.15, ease: "power4.in" });
+                    gsap.to(dialUsuario.position, { 
+                        y: 0.741, 
+                        duration: 0.15, 
+                        ease: "power4.in",
+                        onComplete: () => {
+                            // MAGIA: El alien desaparece exactamente cuando el dial termina de bajar y choca abajo
+                            pantallaMat.opacity = 0;
+                        }
+                    });
+                } else {
+                    // Respaldo para el modelo generado por código
+                    setTimeout(() => { pantallaMat.opacity = 0; }, 150);
                 }
 
-                // Destello Verde original de transformación
                 flashOverlay.style.backgroundColor = '#39ff14';
                 flashOverlay.style.opacity = 1;
-                gsap.to(flashOverlay, { opacity: 0, duration: 1.5, delay: 0.1, ease: "power2.out" });
+                // El destello ahora tiene un delay de 0.15 para estallar justo en el impacto
+                gsap.to(flashOverlay, { opacity: 0, duration: 1.5, delay: 0.15, ease: "power2.out" });
                 
                 omniLight.color.setHex(0x39ff14);
                 omniLight.intensity = 15;
-                gsap.to(omniLight, { intensity: 0, duration: 1.5 });
+                gsap.to(omniLight, { intensity: 0, duration: 1.5, delay: 0.15 });
 
-                setTimeout(iniciarRecarga, 5000); // Esto es cuánto tiempo estás convertido en Alien (5 segundos)
+                setTimeout(iniciarRecarga, 5000); 
             }
         }
 
         function iniciarRecarga() {
             estadoActual = 'RECARGA'; 
+            // Mantener oculta la imagen del alien en estado recarga por si acaso
+            pantallaMat.opacity = 0; 
             
-            // 1. Poner todo en rojo inmediatamente
             placaMat.map = texRelojRojo; matVerdeNeon.color.setHex(0xff0000); matVerdeNeon.emissive.setHex(0xff0000);
             matCoreLateral.emissive.setHex(0xff0000); 
 
-            // 💥 NUEVO: Destello rojo de sobrecarga en la pantalla y la luz omni
             flashOverlay.style.backgroundColor = '#ff0000';
             flashOverlay.style.opacity = 1;
             gsap.to(flashOverlay, { opacity: 0, duration: 1.5, delay: 0.1, ease: "power2.out" });
@@ -746,16 +886,9 @@
                 if (m.mat.emissive) m.mat.emissive.setHex(0xff0000);
             });
 
-            // 2. Reproducir sonido de "desactivar" y, cuando termine, esperar un poco e iniciar recarga
             reproducirSonido('desactivar', () => {
-                
-                // Pequeño silencio simulando "batería descargada" (2 segundos)
                 setTimeout(() => {
-                    
-                    // 3. Reproducir el audio "omnitrix_cargado.mp3"
                     reproducirSonido('recarga', () => {
-                        
-                        // 4. ESTO SUCEDE EXACTAMENTE CUANDO EL MP3 TERMINA (sin cortes ni fallos)
                         estadoActual = 'INACTIVO';
                         placaMat.map = texRelojVerde; matVerdeNeon.color.setHex(0x39ff14); matVerdeNeon.emissive.setHex(0x39ff14);
                         matCoreLateral.emissive.setHex(0x39ff14); omniLight.color.setHex(0x39ff14); flashOverlay.style.backgroundColor = '#39ff14';
@@ -767,7 +900,6 @@
 
                         isAnimating = false; actualizarUI();
                     });
-                    
                 }, 2000);
             });
         }
@@ -776,7 +908,6 @@
         btnIzquierda.addEventListener('click', () => cambiarAlien(-1));
         btnDerecha.addEventListener('click', () => cambiarAlien(1));
 
-        // Interacción Estricta con Clic (Solo botón o dial)
         const raycaster = new THREE.Raycaster();
         const mouse = new THREE.Vector2();
         window.addEventListener('pointerdown', (e) => {
@@ -794,7 +925,6 @@
                     let tocoBoton = false;
                     let tocoDial = false;
                     
-                    // Verificar estrictamente qué malla se tocó y a qué grupo pertenece
                     intersects.forEach(intersect => {
                         let obj = intersect.object;
                         while(obj) {
@@ -805,15 +935,13 @@
                     });
 
                     if (estadoActual === 'INACTIVO') {
-                        // Si existe el botón, EXIGE tocar el botón. Si no existe el botón (por error de nombre), permite tocar cualquier lado.
                         clicValido = botonUsuario ? tocoBoton : true;
                     } else if (estadoActual === 'ACTIVO') {
-                        // Lo mismo para el dial al transformar.
                         clicValido = dialUsuario ? tocoDial : true;
                     }
 
                 } else {
-                    clicValido = true; // Si es el procedural, tocar cualquier parte vale
+                    clicValido = true; 
                 }
 
                 if (clicValido && (estadoActual === 'INACTIVO' || estadoActual === 'ACTIVO')) {
