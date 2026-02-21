@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Omnitrix 3D Clásico Mejorado - Ben 10</title>
     <style>
-        body {
+        /* Solución al fondo blanco: Volvemos a la sintaxis estándar y segura */
+        html, body {
             margin: 0;
             padding: 0;
             overflow: hidden;
@@ -14,6 +15,8 @@
             font-family: 'Courier New', Courier, monospace;
             color: white;
             user-select: none;
+            width: 100vw;
+            height: 100vh;
         }
         #canvas-container {
             position: absolute;
@@ -273,6 +276,28 @@
         #btn-start-experience:active {
             transform: scale(0.95);
         }
+        /* ⏭️ CSS PARA EL BOTÓN DE SALTAR VIDEO ⏭️ */
+        #btn-skip-video {
+            position: absolute;
+            bottom: 30px;
+            right: 30px;
+            background-color: rgba(0, 0, 0, 0.6);
+            color: rgba(255, 255, 255, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: none; /* Oculto al inicio */
+            z-index: 2000001;
+            font-family: 'Courier New', Courier, monospace;
+            transition: all 0.3s ease;
+        }
+        #btn-skip-video:hover {
+            background-color: rgba(57, 255, 20, 0.3);
+            color: #39ff14;
+            border-color: #39ff14;
+        }
     </style>
     <!-- Librerías Core -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -286,6 +311,7 @@
     <div id="intro-video-container">
         <button id="btn-start-experience">INICIAR EXPERIENCIA</button>
         <video id="intro-video" playsinline></video>
+        <button id="btn-skip-video">Saltar ⏭</button>
     </div>
 
     <!-- Aviso de orientación para celulares -->
@@ -331,9 +357,15 @@
         const introContainer = document.getElementById('intro-video-container');
         const introVideo = document.getElementById('intro-video');
         const btnStartExp = document.getElementById('btn-start-experience');
+        const btnSkipVideo = document.getElementById('btn-skip-video');
+        let isFadingOut = false;
 
         // Función segura para cerrar los videos y mostrar el modelo 3D
         function finalizarVideos() {
+            if (isFadingOut) return;
+            isFadingOut = true;
+            btnSkipVideo.style.display = 'none'; // Ocultar el botón de saltar
+            
             // Efecto cinematográfico: Desvanecer la pantalla negra suavemente
             gsap.to(introContainer, {
                 opacity: 0,
@@ -341,10 +373,16 @@
                 ease: "power2.inOut",
                 onComplete: () => {
                     introContainer.style.display = 'none';
-                    introVideo.pause(); 
-                    introVideo.remove(); // Eliminar de forma segura para evitar crasheos de WebGL/RAM
-                    // Forzar ajuste del Canvas 3D para evitar la pantalla negra si hubo un cambio de resolución
-                    window.dispatchEvent(new Event('resize')); 
+                    if (introVideo) {
+                        introVideo.pause(); 
+                        introVideo.removeAttribute('src'); // Limpiar para que el navegador libere RAM
+                        introVideo.load(); 
+                        introVideo.remove(); 
+                    }
+                    // Forzar recalibrado del Canvas para asegurar que ThreeJS llene la pantalla
+                    camera.aspect = window.innerWidth / window.innerHeight; 
+                    camera.updateProjectionMatrix(); 
+                    renderer.setSize(window.innerWidth, window.innerHeight);
                 }
             });
         }
@@ -355,7 +393,8 @@
 
             btnStartExp.addEventListener('click', () => {
                 if (audioCtx.state === 'suspended') audioCtx.resume(); // Destrabar motor de audio en el primer clic
-                btnStartExp.style.display = 'none'; // Ocultar botón
+                btnStartExp.style.display = 'none'; // Ocultar botón iniciar
+                btnSkipVideo.style.display = 'block'; // Mostrar botón saltar
                 introVideo.style.display = 'block'; // Mostrar video
                 introVideo.src = RutaVideoIntro;
                 introVideo.play().catch(e => {
@@ -364,9 +403,15 @@
                 });
             });
 
+            // Lógica para saltar el video en cualquier momento
+            btnSkipVideo.addEventListener('click', () => {
+                // Al forzar el evento 'ended', el código simula que el video terminó naturalmente
+                introVideo.dispatchEvent(new Event('ended'));
+            });
+
             introVideo.addEventListener('ended', () => {
                 if (videoActual === 1 && RutaVideoObtencion && RutaVideoObtencion.trim() !== "") {
-                    // Terminó la intro, pasamos al video 2
+                    // Terminó la intro (o la saltaron), pasamos al video 2
                     videoActual = 2;
                     introVideo.src = RutaVideoObtencion;
                     introVideo.play().catch(e => {
@@ -374,7 +419,7 @@
                         finalizarVideos();
                     });
                 } else {
-                    // Terminó toda la secuencia
+                    // Terminó toda la secuencia (o saltaron el segundo video)
                     finalizarVideos();
                 }
             });
@@ -610,6 +655,10 @@
         renderer.setPixelRatio(window.devicePixelRatio);
         renderer.shadowMap.enabled = true;
         renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        
+        // Mantenemos la transparencia nativa para que se muestre el gradiente de fondo
+        renderer.setClearColor(0x000000, 0); 
+        
         container.appendChild(renderer.domElement);
 
         const controls = new THREE.OrbitControls(camera, renderer.domElement);
@@ -624,7 +673,7 @@
         // ==========================================
         const pantallaMat = new THREE.MeshBasicMaterial({ 
             map: texturasAliens[0], transparent: true, opacity: 0, 
-            blending: THREE.AdditiveBlending, depthWrite: false, color: 0xffffff // color blanco para no teñir tus PNGs
+            blending: THREE.AdditiveBlending, depthWrite: false, color: 0xffffff 
         });
         const pantallaAlien = new THREE.Mesh(new THREE.CircleGeometry(1.5, 32), pantallaMat);
         // Rotamos el disco para que quede acostado
@@ -685,9 +734,12 @@
         let materialesDinamicos = []; 
 
         if (RutaModeloGLB && RutaModeloGLB.trim() !== "") {
-            omnitrixProcedural.visible = false; 
-
+            
+            // Ya no ocultamos el modelo de inmediato para evitar que se vea la pantalla vacía al descargar
             loader.load(RutaModeloGLB, function(gltf) {
+                
+                omnitrixProcedural.visible = false; 
+
                 if (modeloUsuario) modeloPrincipalGroup.remove(modeloUsuario);
                 
                 modeloUsuario = gltf.scene;
@@ -765,9 +817,6 @@
                 modeloPrincipalGroup.add(modeloUsuario);
                 
                 console.log("✅ Modelo 3D cargado con éxito desde:", RutaModeloGLB);
-                console.log(dialUsuario ? "✅ Dial detectado." : "❌ Dial NO detectado.");
-                console.log(discoDialUsuario ? "✅ Discos_Dial detectado." : "❌ Discos_Dial NO detectado.");
-                console.log(botonUsuario ? "✅ Botón detectado." : "❌ Botón NO detectado.");
 
             }, undefined, function(error) {
                 console.error("❌ Error al cargar tu archivo .GLB:", error);
@@ -864,7 +913,7 @@
                 actualizarUI();
                 reproducirSonido('transformacion');
 
-                // OJO AQUÍ: La bajada del núcleo dura 0.15 segundos
+                // La bajada del núcleo dura 0.15 segundos
                 gsap.to(nucleoGroup.position, { y: 0.5, duration: 0.15, ease: "power4.in" });
                 
                 if(modeloUsuario && dialUsuario) {
@@ -878,7 +927,6 @@
                         }
                     });
                 } else {
-                    // Respaldo para el modelo generado por código
                     setTimeout(() => { pantallaMat.opacity = 0; }, 150);
                 }
 
