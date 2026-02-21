@@ -341,20 +341,15 @@
         }
         .patreon-login-btn:hover { background-color: #ff5e67; box-shadow: 0 0 20px rgba(255, 66, 77, 0.6); transform: scale(1.05); }
 
-        /* 🖼️ ZONAS DE ANUNCIOS (PLACEHOLDERS) 🖼️ */
+        /* 🖼️ ZONAS DE ANUNCIOS 🖼️ */
         .ad-zone {
             position: absolute;
-            background: rgba(20, 20, 20, 0.6);
-            border: 2px dashed #39ff14;
-            color: #39ff14;
+            z-index: 5; /* Por debajo de los botones pero encima del 3D */
+            pointer-events: auto;
             display: flex;
             justify-content: center;
             align-items: center;
-            text-align: center;
-            font-size: 12px;
-            z-index: 5; /* Por debajo de los botones pero encima del 3D */
-            pointer-events: auto;
-            opacity: 0.5; /* Para no molestar demasiado en la prueba */
+            overflow: hidden;
         }
         /* PC: Banners Laterales */
         @media screen and (min-width: 1025px) {
@@ -406,10 +401,30 @@
         </div>
     </div>
     
-    <!-- 🖼️ PLACEHOLDERS DE ADSENSE 🖼️ -->
-    <div id="ad-left" class="ad-zone">Espacio<br>Anuncio<br>160x600</div>
-    <div id="ad-right" class="ad-zone">Espacio<br>Anuncio<br>160x600</div>
-    <div id="ad-mobile" class="ad-zone">Espacio Anuncio Móvil 320x50</div>
+    <!-- 🖼️ ZONAS DE ANUNCIOS (ADSENSE) 🖼️ -->
+    <div id="ad-left" class="ad-zone">
+        <ins class="adsbygoogle"
+             style="display:inline-block;width:160px;height:600px"
+             data-ad-client="ca-pub-2350421618818190"
+             data-ad-slot="3613385177"></ins>
+        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </div>
+    
+    <div id="ad-right" class="ad-zone">
+        <ins class="adsbygoogle"
+             style="display:inline-block;width:160px;height:600px"
+             data-ad-client="ca-pub-2350421618818190"
+             data-ad-slot="2839864136"></ins>
+        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </div>
+    
+    <div id="ad-mobile" class="ad-zone">
+        <ins class="adsbygoogle"
+             style="display:inline-block;width:320px;height:50px"
+             data-ad-client="ca-pub-2350421618818190"
+             data-ad-slot="7764887750"></ins>
+        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </div>
 
     <!-- 🛠️ PANEL SECRETO DE AJUSTES 🛠️ -->
     <div id="debug-panel">
