@@ -293,6 +293,51 @@
             color: #39ff14;
             border-color: #39ff14;
         }
+        
+        /* 🛠️ CSS PARA EL PANEL SECRETO DE AJUSTES 🛠️ */
+        #debug-panel {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.9);
+            border: 2px solid #ffaa00;
+            padding: 15px;
+            border-radius: 10px;
+            z-index: 999999;
+            display: none; /* Oculto por defecto */
+            font-size: 14px;
+            box-shadow: 0 0 15px rgba(255, 170, 0, 0.4);
+            pointer-events: auto;
+            color: white;
+        }
+        #debug-panel h3 {
+            margin: 0 0 10px 0;
+            color: #ffaa00;
+            text-shadow: none;
+            font-size: 18px;
+            text-align: left;
+        }
+        .debug-control {
+            margin-bottom: 12px;
+            display: flex;
+            flex-direction: column;
+        }
+        .debug-control label {
+            margin-bottom: 5px;
+            display: flex;
+            justify-content: space-between;
+            font-family: Arial, sans-serif;
+        }
+        .debug-control input[type=range] {
+            width: 200px;
+        }
+        .debug-hint {
+            font-size: 11px;
+            color: #aaa;
+            margin-top: 10px;
+            max-width: 200px;
+            font-family: Arial, sans-serif;
+        }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
@@ -312,9 +357,35 @@
         <h2>¡Gira tu celular!</h2>
         <p>Para disfrutar al máximo del Omnitrix, por favor pon tu dispositivo en modo horizontal.</p>
     </div>
+    
+    <!-- 🛠️ PANEL SECRETO DE AJUSTES 🛠️ -->
+    <div id="debug-panel">
+        <h3>⚙️ Ajuste Holograma</h3>
+        <div class="debug-control">
+            <label>Posición X (Izq/Der): <span id="val-x">0.05</span></label>
+            <input type="range" id="slider-x" min="-2" max="2" step="0.01" value="0.05">
+        </div>
+        <div class="debug-control">
+            <label>Posición Z (Atrás/Adelante): <span id="val-z">0.00</span></label>
+            <input type="range" id="slider-z" min="-2" max="2" step="0.01" value="0.00">
+        </div>
+        <div class="debug-control">
+            <label>Altura Y: <span id="val-y">1.40</span></label>
+            <input type="range" id="slider-y" min="-1" max="5" step="0.01" value="1.40">
+        </div>
+        <div class="debug-control">
+            <label>Tamaño: <span id="val-s">0.50</span></label>
+            <input type="range" id="slider-s" min="0.1" max="3" step="0.01" value="0.50">
+        </div>
+        <div class="debug-control">
+            <label>Opacidad: <span id="val-o">1.00</span></label>
+            <input type="range" id="slider-o" min="0.1" max="1" step="0.05" value="1.00">
+        </div>
+        <div class="debug-hint">Anota los números finales y cámbialos en tu código definitivo.</div>
+    </div>
 
     <div id="ui-overlay">
-        <h1>Omnitrix Clásico</h1>
+        <h1 id="main-title">Omnitrix Clásico</h1>
         <p>Gira la cámara en 360° con el ratón/dedo.</p>
         <div id="alien-name" class="alien-name">FUEGO</div>
     </div>
@@ -366,7 +437,7 @@
                         introVideo.pause(); 
                         introVideo.removeAttribute('src'); 
                         introVideo.load(); 
-                        introVideo.remove(); 
+                        introVideo.style.display = 'none'; // En lugar de remove() para no romper navegadores
                     }
                     camera.aspect = window.innerWidth / window.innerHeight; 
                     camera.updateProjectionMatrix(); 
@@ -416,14 +487,14 @@
         // ==========================================
         const RutaModeloGLB = "classic_omnitrix.glb"; 
         
-        const AlturaPantallaAlien = 1.4; 
-        const TamanoPantallaAlien = 0.50;  
-        const OpacidadHolograma = 1;    
+        // CORRECCIÓN: Ahora son "let" para que el código del panel no se trabe al intentar modificarlas
+        let AlturaPantallaAlien = 1.4; 
+        let TamanoPantallaAlien = 0.50;  
+        let OpacidadHolograma = 1;    
 
         // 🟢 NUEVO: AJUSTES PARA CENTRAR EL HOLOGRAMA 🟢
-        // Usa números decimales pequeños (ej: 0.05, -0.05, 0.1) para empujarlo en la dirección correcta.
-        const DesplazamientoX = 0.05; // Positivo mueve a la derecha, negativo a la izquierda
-        const DesplazamientoZ = 0.0;  // Positivo mueve "hacia atrás", negativo "hacia adelante"
+        let DesplazamientoX = 0.05; // Positivo mueve a la derecha, negativo a la izquierda
+        let DesplazamientoZ = 0.0;  // Positivo mueve "hacia atrás", negativo "hacia adelante"
 
         const RutasAliens = [
             "aliens/256x256/fuego.png",         
@@ -655,7 +726,6 @@
         // ==========================================
         const pantallaMat = new THREE.MeshBasicMaterial({ 
             map: texturasAliens[0], transparent: true, opacity: 0, 
-            // ¡ELIMINADO: blending: THREE.AdditiveBlending! Ahora será 100% sólido y respetará tu fondo negro.
             depthWrite: false, color: 0xffffff 
         });
         const pantallaAlien = new THREE.Mesh(new THREE.CircleGeometry(1.5, 32), pantallaMat);
@@ -722,104 +792,111 @@
         if (RutaModeloGLB && RutaModeloGLB.trim() !== "") {
             
             loader.load(RutaModeloGLB, function(gltf) {
-                
-                omnitrixProcedural.visible = false; 
+                // BLINDAJE: Usamos try...catch por si el modelo tiene fallas de exportación
+                try {
+                    omnitrixProcedural.visible = false; 
 
-                if (modeloUsuario) modeloPrincipalGroup.remove(modeloUsuario);
-                
-                modeloUsuario = gltf.scene;
-                dialUsuario = null;
-                discoDialUsuario = null;
-                relojArenaVerdeUsuario = null;
-                object16Usuario = null;
-                botonUsuario = null;
-                materialesDinamicos = []; 
-                
-                const box = new THREE.Box3().setFromObject(modeloUsuario);
-                const size = box.getSize(new THREE.Vector3()).length();
-                const center = box.getCenter(new THREE.Vector3());
-                
-                const scale = 15 / size; 
-                modeloUsuario.scale.set(scale, scale, scale);
-                modeloUsuario.position.sub(center.multiplyScalar(scale)); 
-
-                modeloUsuario.traverse((child) => {
-                    if (child.name) {
-                        const nombre = child.name.toLowerCase();
-                        
-                        // Guardamos la base original de las piezas para saber desde donde suben y bajan
-                        if (!dialUsuario && (nombre.includes('dial') || nombre.includes('nucleo')) && !nombre.includes('discos')) {
-                            dialUsuario = child;
-                            dialUsuario.userData.baseY = child.position.y;
-                            dialUsuario.userData.elevatedY = child.position.y + 0.36; // Sube 0.36
-                        }
-
-                        if (!discoDialUsuario && nombre.includes('discos_dial')) {
-                            discoDialUsuario = child;
-                            discoDialUsuario.userData.baseY = child.position.y;
-                            discoDialUsuario.userData.elevatedY = child.position.y + 0.36;
-                        }
-
-                        if (!relojArenaVerdeUsuario && nombre.includes('reloj_arena_verde')) {
-                            relojArenaVerdeUsuario = child;
-                            relojArenaVerdeUsuario.userData.baseY = child.position.y;
-                            relojArenaVerdeUsuario.userData.elevatedY = child.position.y + 0.36;
-                        }
-
-                        if (!object16Usuario && nombre.includes('object_16')) {
-                            object16Usuario = child;
-                            object16Usuario.userData.baseY = child.position.y;
-                            object16Usuario.userData.elevatedY = child.position.y + 0.36;
-                        }
-                        
-                        if (!botonUsuario && nombre.includes('boton')) {
-                            botonUsuario = child;
-                            botonUsuario.userData.posInicial = botonUsuario.position.clone();
-                        }
+                    if (modeloUsuario) modeloPrincipalGroup.remove(modeloUsuario);
+                    
+                    modeloUsuario = gltf.scene;
+                    dialUsuario = null;
+                    discoDialUsuario = null;
+                    relojArenaVerdeUsuario = null;
+                    object16Usuario = null;
+                    botonUsuario = null;
+                    materialesDinamicos = []; 
+                    
+                    const box = new THREE.Box3().setFromObject(modeloUsuario);
+                    const size = box.getSize(new THREE.Vector3()).length();
+                    const center = box.getCenter(new THREE.Vector3());
+                    
+                    // Aseguramos matemáticamente que la escala no se rompa si el archivo está corrupto
+                    if (size > 0 && size !== Infinity) {
+                        const scale = 15 / size; 
+                        modeloUsuario.scale.set(scale, scale, scale);
+                        modeloUsuario.position.sub(center.multiplyScalar(scale)); 
+                    } else {
+                        modeloUsuario.scale.set(1, 1, 1);
                     }
 
-                    if (child.isMesh) {
-                        child.castShadow = true;
-                        child.receiveShadow = true;
-
-                        if (child.material) {
-                            const mat = child.material;
-                            const c = mat.color;
-                            const e = mat.emissive;
+                    modeloUsuario.traverse((child) => {
+                        if (child.name) {
+                            const nombre = child.name.toLowerCase();
                             
-                            const esVerde = 
-                                (c && c.g > c.r + 0.1 && c.g > c.b + 0.1) || 
-                                (e && e.g > e.r + 0.1 && e.g > e.b + 0.1) || 
-                                (mat.name && (mat.name.toLowerCase().includes('verd') || mat.name.toLowerCase().includes('green') || mat.name.toLowerCase().includes('glow') || mat.name.toLowerCase().includes('luz')));
+                            if (!dialUsuario && (nombre.includes('dial') || nombre.includes('nucleo')) && !nombre.includes('discos')) {
+                                dialUsuario = child;
+                                dialUsuario.userData.baseY = child.position.y;
+                                dialUsuario.userData.elevatedY = child.position.y + 0.36; 
+                            }
 
-                            if (esVerde) {
-                                if (!materialesDinamicos.find(m => m.mat === mat)) {
-                                    materialesDinamicos.push({
-                                        mat: mat,
-                                        origColor: c ? c.clone() : null,
-                                        origEmissive: e ? e.clone() : null
-                                    });
+                            if (!discoDialUsuario && nombre.includes('discos_dial')) {
+                                discoDialUsuario = child;
+                                discoDialUsuario.userData.baseY = child.position.y;
+                                discoDialUsuario.userData.elevatedY = child.position.y + 0.36;
+                            }
+
+                            if (!relojArenaVerdeUsuario && nombre.includes('reloj_arena_verde')) {
+                                relojArenaVerdeUsuario = child;
+                                relojArenaVerdeUsuario.userData.baseY = child.position.y;
+                                relojArenaVerdeUsuario.userData.elevatedY = child.position.y + 0.36;
+                            }
+
+                            if (!object16Usuario && nombre.includes('object_16')) {
+                                object16Usuario = child;
+                                object16Usuario.userData.baseY = child.position.y;
+                                object16Usuario.userData.elevatedY = child.position.y + 0.36;
+                            }
+                            
+                            if (!botonUsuario && nombre.includes('boton')) {
+                                botonUsuario = child;
+                                botonUsuario.userData.posInicial = botonUsuario.position.clone();
+                            }
+                        }
+
+                        if (child.isMesh) {
+                            child.castShadow = true;
+                            child.receiveShadow = true;
+
+                            if (child.material) {
+                                const mat = child.material;
+                                const c = mat.color;
+                                const e = mat.emissive;
+                                
+                                const esVerde = 
+                                    (c && c.g > c.r + 0.1 && c.g > c.b + 0.1) || 
+                                    (e && e.g > e.r + 0.1 && e.g > e.b + 0.1) || 
+                                    (mat.name && (mat.name.toLowerCase().includes('verd') || mat.name.toLowerCase().includes('green') || mat.name.toLowerCase().includes('glow') || mat.name.toLowerCase().includes('luz')));
+
+                                if (esVerde) {
+                                    if (!materialesDinamicos.find(m => m.mat === mat)) {
+                                        materialesDinamicos.push({
+                                            mat: mat,
+                                            origColor: c ? c.clone() : null,
+                                            origEmissive: e ? e.clone() : null
+                                        });
+                                    }
                                 }
                             }
                         }
+                    });
+
+                    if (discoDialUsuario) {
+                        discoDialUsuario.add(pantallaAlien);
+                        pantallaAlien.position.set(DesplazamientoX, AlturaPantallaAlien, DesplazamientoZ);
+                        pantallaAlien.scale.set(TamanoPantallaAlien, TamanoPantallaAlien, TamanoPantallaAlien);
+                    } else if (dialUsuario) {
+                        dialUsuario.add(pantallaAlien);
+                        pantallaAlien.position.set(DesplazamientoX, AlturaPantallaAlien, DesplazamientoZ);
+                        pantallaAlien.scale.set(TamanoPantallaAlien, TamanoPantallaAlien, TamanoPantallaAlien);
                     }
-                });
 
-                if (discoDialUsuario) {
-                    discoDialUsuario.add(pantallaAlien);
-                    // Ahora aplicamos los desplazamientos que configuraste arriba
-                    pantallaAlien.position.set(DesplazamientoX, AlturaPantallaAlien, DesplazamientoZ);
-                    pantallaAlien.scale.set(TamanoPantallaAlien, TamanoPantallaAlien, TamanoPantallaAlien);
-                } else if (dialUsuario) {
-                    dialUsuario.add(pantallaAlien);
-                    // Ahora aplicamos los desplazamientos que configuraste arriba
-                    pantallaAlien.position.set(DesplazamientoX, AlturaPantallaAlien, DesplazamientoZ);
-                    pantallaAlien.scale.set(TamanoPantallaAlien, TamanoPantallaAlien, TamanoPantallaAlien);
+                    modeloPrincipalGroup.add(modeloUsuario);
+                    console.log("✅ Modelo 3D cargado con éxito desde:", RutaModeloGLB);
+
+                } catch (err) {
+                    console.error("❌ Error interno al configurar tu modelo 3D:", err);
+                    omnitrixProcedural.visible = true; // Activa el modelo de emergencia
                 }
-
-                modeloPrincipalGroup.add(modeloUsuario);
-                console.log("✅ Modelo 3D cargado con éxito desde:", RutaModeloGLB);
-
             }, undefined, function(error) {
                 console.error("❌ Error al cargar tu archivo .GLB:", error);
                 omnitrixProcedural.visible = true;
@@ -864,7 +941,6 @@
             gsap.to(dialGroup.rotation, { y: dialGroup.rotation.y + (dir * Math.PI / 5), duration: 0.3, ease: "power2.out", onComplete: () => { isAnimating = false; }});
 
             if(modeloUsuario && dialUsuario) {
-                // SOLAMENTE giramos el dial de la tuerca exterior. Las piezas internas ya no giran en absoluto.
                 gsap.to(dialUsuario.rotation, { y: dialUsuario.rotation.y + (dir * Math.PI / 5), duration: 0.3, ease: "power2.out" });
             }
 
@@ -897,7 +973,6 @@
                         });
                     }
 
-                    // Subimos las 4 piezas de forma totalmente independiente a la misma altura
                     if (dialUsuario) {
                         gsap.to(dialUsuario.position, { y: dialUsuario.userData.elevatedY, duration: 0.5, delay: 0.1, ease: "back.out(1.5)" });
                     }
@@ -926,7 +1001,6 @@
                 gsap.to(nucleoGroup.position, { y: 0.5, duration: 0.15, ease: "power4.in" });
                 
                 if(modeloUsuario) {
-                    // Bajamos todas las piezas a su punto inicial
                     if (dialUsuario) gsap.to(dialUsuario.position, { y: dialUsuario.userData.baseY, duration: 0.15, ease: "power4.in", onComplete: () => { pantallaMat.opacity = 0; } });
                     if (discoDialUsuario) gsap.to(discoDialUsuario.position, { y: discoDialUsuario.userData.baseY, duration: 0.15, ease: "power4.in" });
                     if (relojArenaVerdeUsuario) gsap.to(relojArenaVerdeUsuario.position, { y: relojArenaVerdeUsuario.userData.baseY, duration: 0.15, ease: "power4.in" });
@@ -1069,25 +1143,22 @@
             TamanoPantallaAlien = parseFloat(document.getElementById('slider-s').value);
             OpacidadHolograma = parseFloat(document.getElementById('slider-o').value);
 
-            // Actualizar los textos en el panel
             document.getElementById('val-x').innerText = DesplazamientoX.toFixed(2);
             document.getElementById('val-z').innerText = DesplazamientoZ.toFixed(2);
             document.getElementById('val-y').innerText = AlturaPantallaAlien.toFixed(2);
             document.getElementById('val-s').innerText = TamanoPantallaAlien.toFixed(2);
             document.getElementById('val-o').innerText = OpacidadHolograma.toFixed(2);
 
-            // Aplicar en tiempo real al holograma
             if (pantallaAlien) {
                 pantallaAlien.position.set(DesplazamientoX, AlturaPantallaAlien, DesplazamientoZ);
                 pantallaAlien.scale.set(TamanoPantallaAlien, TamanoPantallaAlien, TamanoPantallaAlien);
-                // Si el reloj está activo, cambiar la transparencia de la luz visible
                 if (estadoActual === 'ACTIVO') {
                     pantallaMat.opacity = OpacidadHolograma;
                 }
             }
         };
 
-        // Escuchar los deslizadores
+        // Escuchar los deslizadores sin causar fallos
         document.getElementById('slider-x').addEventListener('input', updateHologramSettings);
         document.getElementById('slider-z').addEventListener('input', updateHologramSettings);
         document.getElementById('slider-y').addEventListener('input', updateHologramSettings);
