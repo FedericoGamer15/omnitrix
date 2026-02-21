@@ -309,6 +309,8 @@
             box-shadow: 0 0 15px rgba(255, 170, 0, 0.4);
             pointer-events: auto;
             color: white;
+            max-height: 90vh;
+            overflow-y: auto;
         }
         #debug-panel h3 {
             margin: 0 0 10px 0;
@@ -362,25 +364,36 @@
     <div id="debug-panel">
         <h3>⚙️ Ajuste Holograma</h3>
         <div class="debug-control">
-            <label>Posición X (Izq/Der): <span id="val-x">0.05</span></label>
-            <input type="range" id="slider-x" min="-2" max="2" step="0.01" value="0.05">
+            <label>Posición X (Izq/Der): <span id="val-x">-0.07</span></label>
+            <input type="range" id="slider-x" min="-2" max="2" step="0.01" value="-0.07">
         </div>
         <div class="debug-control">
-            <label>Posición Z (Atrás/Adelante): <span id="val-z">0.00</span></label>
-            <input type="range" id="slider-z" min="-2" max="2" step="0.01" value="0.00">
+            <label>Posición Z (Atrás/Adelante): <span id="val-z">0.03</span></label>
+            <input type="range" id="slider-z" min="-2" max="2" step="0.01" value="0.03">
         </div>
         <div class="debug-control">
-            <label>Altura Y: <span id="val-y">1.40</span></label>
-            <input type="range" id="slider-y" min="-1" max="5" step="0.01" value="1.40">
+            <label>Altura Y: <span id="val-y">1.01</span></label>
+            <input type="range" id="slider-y" min="-1" max="5" step="0.01" value="1.01">
         </div>
         <div class="debug-control">
-            <label>Tamaño: <span id="val-s">0.50</span></label>
-            <input type="range" id="slider-s" min="0.1" max="3" step="0.01" value="0.50">
+            <label>Tamaño: <span id="val-s">0.58</span></label>
+            <input type="range" id="slider-s" min="0.1" max="3" step="0.01" value="0.58">
         </div>
         <div class="debug-control">
             <label>Opacidad: <span id="val-o">1.00</span></label>
             <input type="range" id="slider-o" min="0.1" max="1" step="0.05" value="1.00">
         </div>
+
+        <h3 style="margin-top: 15px;">💡 Iluminación</h3>
+        <div class="debug-control">
+            <label>Luz Ambiental: <span id="val-l-amb">0.80</span></label>
+            <input type="range" id="slider-l-amb" min="0" max="3" step="0.1" value="0.80">
+        </div>
+        <div class="debug-control">
+            <label>Luz Direccional: <span id="val-l-dir">1.50</span></label>
+            <input type="range" id="slider-l-dir" min="0" max="5" step="0.1" value="1.50">
+        </div>
+
         <div class="debug-hint">Anota los números finales y cámbialos en tu código definitivo.</div>
     </div>
 
@@ -487,14 +500,17 @@
         // ==========================================
         const RutaModeloGLB = "classic_omnitrix.glb"; 
         
-        // CORRECCIÓN: Ahora son "let" para que el código del panel no se trabe al intentar modificarlas
         let AlturaPantallaAlien = 1.01; 
         let TamanoPantallaAlien = 0.58;  
         let OpacidadHolograma = 1;    
 
-        // 🟢 NUEVO: AJUSTES PARA CENTRAR EL HOLOGRAMA 🟢
-        let DesplazamientoX = -0.07; // Positivo mueve a la derecha, negativo a la izquierda
-        let DesplazamientoZ = 0.03;  // Positivo mueve "hacia atrás", negativo "hacia adelante"
+        // 🟢 AJUSTES PARA CENTRAR EL HOLOGRAMA 🟢
+        let DesplazamientoX = -0.07; 
+        let DesplazamientoZ = 0.03;  
+
+        // 💡 AJUSTES DE ILUMINACIÓN 💡
+        let IntensidadAmbiente = 0.8;    // Rellena las sombras oscuras
+        let IntensidadDireccional = 1.5; // Foco principal para brillos
 
         const RutasAliens = [
             "aliens/256x256/fuego.png",         
@@ -717,8 +733,13 @@
         const controls = new THREE.OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true; controls.dampingFactor = 0.05; controls.minDistance = 5; controls.maxDistance = 60;
 
-        scene.add(new THREE.AmbientLight(0xffffff, 0.5));
-        const dirLight = new THREE.DirectionalLight(0xffffff, 1.2); dirLight.position.set(15, 25, 15); dirLight.castShadow = true; scene.add(dirLight);
+        const ambientLight = new THREE.AmbientLight(0xffffff, IntensidadAmbiente);
+        scene.add(ambientLight);
+        const dirLight = new THREE.DirectionalLight(0xffffff, IntensidadDireccional); 
+        dirLight.position.set(15, 25, 15); 
+        dirLight.castShadow = true; 
+        scene.add(dirLight);
+        
         const omniLight = new THREE.PointLight(0x39ff14, 0, 35); omniLight.position.set(0, 5, 0); scene.add(omniLight);
 
         // ==========================================
