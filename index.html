@@ -903,7 +903,7 @@
                 gsap.to(omniLight, { intensity: 1.5, duration: 0.5 });
                 
                 // Mostrar la imagen del alien cuando se activa
-                gsap.to(pantallaMat, { opacity: 1, duration: 0.5, delay: 0.2, onComplete: () => { estadoActual = 'ACTIVO'; isAnimating = false; actualizarUI(); }});
+                gsap.to(pantallaMat, { opacity: 0.8, duration: 0.5, delay: 0.2, onComplete: () => { estadoActual = 'ACTIVO'; isAnimating = false; actualizarUI(); }});
 
             } else if (estadoActual === 'ACTIVO') {
                 isAnimating = true;
@@ -1045,6 +1045,7 @@
     </script>
 </body>
 </html>
+
 
 
 
