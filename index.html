@@ -16,9 +16,13 @@
             user-select: none;
         }
         #canvas-container {
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 100vw;
             height: 100vh;
             display: block;
+            z-index: 1; /* Garantiza que siempre esté en el fondo bajo la UI */
         }
         #ui-overlay {
             position: absolute;
@@ -62,6 +66,7 @@
             justify-content: center;
             width: max-content;
             max-width: 95vw;
+            z-index: 10;
         }
         button, .upload-btn {
             background-color: #111;
@@ -314,6 +319,9 @@
     <div id="canvas-container"></div>
 
     <script>
+        // Inicializar contexto de audio globalmente
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
         // ==========================================
         // 🎬 CONFIGURACIÓN DE VIDEOS INICIALES 🎬
         // ==========================================
@@ -324,15 +332,36 @@
         const introVideo = document.getElementById('intro-video');
         const btnStartExp = document.getElementById('btn-start-experience');
 
+        // Función segura para cerrar los videos y mostrar el modelo 3D
+        function finalizarVideos() {
+            // Efecto cinematográfico: Desvanecer la pantalla negra suavemente
+            gsap.to(introContainer, {
+                opacity: 0,
+                duration: 1.5,
+                ease: "power2.inOut",
+                onComplete: () => {
+                    introContainer.style.display = 'none';
+                    introVideo.pause(); 
+                    introVideo.remove(); // Eliminar de forma segura para evitar crasheos de WebGL/RAM
+                    // Forzar ajuste del Canvas 3D para evitar la pantalla negra si hubo un cambio de resolución
+                    window.dispatchEvent(new Event('resize')); 
+                }
+            });
+        }
+
         // Si hay videos configurados, activamos la secuencia
         if (RutaVideoIntro && RutaVideoIntro.trim() !== "") {
             let videoActual = 1;
 
             btnStartExp.addEventListener('click', () => {
+                if (audioCtx.state === 'suspended') audioCtx.resume(); // Destrabar motor de audio en el primer clic
                 btnStartExp.style.display = 'none'; // Ocultar botón
                 introVideo.style.display = 'block'; // Mostrar video
                 introVideo.src = RutaVideoIntro;
-                introVideo.play().catch(e => console.log("Error al reproducir video:", e));
+                introVideo.play().catch(e => {
+                    console.log("Error al reproducir video:", e);
+                    finalizarVideos(); // Si falla, va directo al reloj
+                });
             });
 
             introVideo.addEventListener('ended', () => {
@@ -340,11 +369,13 @@
                     // Terminó la intro, pasamos al video 2
                     videoActual = 2;
                     introVideo.src = RutaVideoObtencion;
-                    introVideo.play().catch(e => console.log("Error al reproducir segundo video:", e));
+                    introVideo.play().catch(e => {
+                        console.log("Error al reproducir segundo video:", e);
+                        finalizarVideos();
+                    });
                 } else {
-                    // Terminó toda la secuencia, ocultamos la pantalla negra y mostramos el 3D
-                    introContainer.style.display = 'none';
-                    introVideo.src = ""; // Liberar memoria
+                    // Terminó toda la secuencia
+                    finalizarVideos();
                 }
             });
         } else {
@@ -381,7 +412,6 @@
             activar: "sonidos/omnitrix_activate.mp3", girarDial: "sonidos/omnitrix_girar-dial.mp3", transformacion: "sonidos/omnitrix_transform.mp3", desactivar: "sonidos/omnitrix_power-down.mp3", recarga: "sonidos/omnitrix_cargado.mp3", loopSeleccion: "sonidos/omnitrix_dial-loop.wav"
         };
         
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         const audiosCargados = {};
         const audioBuffers = {}; 
 
@@ -725,11 +755,11 @@
                 if (discoDialUsuario) {
                     discoDialUsuario.add(pantallaAlien);
                     pantallaAlien.position.set(0, AlturaPantallaAlien, 0);
-                    pantallaAlien.scale.set(TamañoPantallaAlien, TamañoPantallaAlien, TamañoPantallaAlien);
+                    pantallaAlien.scale.set(TamanoPantallaAlien, TamanoPantallaAlien, TamanoPantallaAlien);
                 } else if (dialUsuario) {
                     dialUsuario.add(pantallaAlien);
                     pantallaAlien.position.set(0, AlturaPantallaAlien, 0);
-                    pantallaAlien.scale.set(TamañoPantallaAlien, TamañoPantallaAlien, TamañoPantallaAlien);
+                    pantallaAlien.scale.set(TamanoPantallaAlien, TamanoPantallaAlien, TamanoPantallaAlien);
                 }
 
                 modeloPrincipalGroup.add(modeloUsuario);
