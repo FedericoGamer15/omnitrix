@@ -500,11 +500,12 @@
         // ==========================================
         const RutaModeloGLB = "classic_omnitrix.glb"; 
         
+        // CORRECCIÓN: Ahora son "let" para que el código del panel no se trabe al intentar modificarlas
         let AlturaPantallaAlien = 1.01; 
         let TamanoPantallaAlien = 0.58;  
         let OpacidadHolograma = 1;    
 
-        // 🟢 AJUSTES PARA CENTRAR EL HOLOGRAMA 🟢
+        // 🟢 NUEVO: AJUSTES PARA CENTRAR EL HOLOGRAMA 🟢
         let DesplazamientoX = -0.07; 
         let DesplazamientoZ = 0.03;  
 
@@ -523,6 +524,22 @@
             "aliens/256x256/acuatico.png",      
             "aliens/256x256/ultra-t.png",       
             "aliens/256x256/fantasmatico.png"   
+        ];
+
+        // 🎬 PON AQUÍ LAS RUTAS DE LOS VIDEOS DE TRANSFORMACIÓN DE CADA ALIEN 🎬
+        // Deben estar en el mismo orden que las imágenes de arriba. 
+        // Si a alguno aún no le tienes video, déjalo vacío ("") y no pasará nada, solo brillará en verde.
+        const VideosTransformacion = [
+            "videos_aliens/fuego.mp4",         // Alien 0
+            "videos_aliens/bestia.mp4",        // Alien 1
+            "videos_aliens/diamante.mp4",      // Alien 2
+            "videos_aliens/xlr8.mp4",          // Alien 3
+            "videos_aliens/materia_gris.mp4",  // Alien 4
+            "videos_aliens/cuatro_brazos.mp4", // Alien 5
+            "videos_aliens/insectoide.mp4",    // Alien 6
+            "videos_aliens/acuatico.mp4",      // Alien 7
+            "videos_aliens/ultra-t.mp4",       // Alien 8
+            "videos_aliens/fantasmatico.mp4"   // Alien 9
         ];
 
         const MisSonidos = {
@@ -1034,11 +1051,54 @@
                 flashOverlay.style.opacity = 1;
                 gsap.to(flashOverlay, { opacity: 0, duration: 1.5, delay: 0.15, ease: "power2.out" });
                 
+                // --- NUEVO: REPRODUCIR VIDEO DE TRANSFORMACIÓN ININTERRUMPIBLE ---
+                const transformVideoContainer = document.getElementById('transform-video-container');
+                const transformVideo = document.getElementById('transform-video');
+                const videoSrc = VideosTransformacion[alienSeleccionado];
+
+                if (videoSrc && videoSrc.trim() !== "") {
+                    // Mostrar video justo en el pico del flash (0.15s) para camuflar el corte
+                    setTimeout(() => {
+                        transformVideoContainer.style.display = 'block';
+                        transformVideo.src = videoSrc;
+                        transformVideo.play().catch(e => {
+                            console.log("Error al reproducir transformación:", e);
+                            // Si el video falla, inicia el temporizador por seguridad
+                            setTimeout(iniciarRecarga, 8000); 
+                        });
+                    }, 150);
+
+                    // Función para ocultar el video al terminar automáticamente
+                    const ocultarVideoTransformacion = () => {
+                        
+                        // ⏱️ ¡AQUÍ ESTÁ LA MAGIA! El contador de 8 segundos empieza RECIÉN cuando termina el video
+                        setTimeout(iniciarRecarga, 8000);
+
+                        gsap.to(transformVideoContainer, {
+                            opacity: 0,
+                            duration: 0.5,
+                            onComplete: () => {
+                                transformVideoContainer.style.display = 'none';
+                                transformVideoContainer.style.opacity = 1; // Restaurar para la próxima
+                                transformVideo.pause();
+                                transformVideo.removeAttribute('src');
+                                transformVideo.load();
+                            }
+                        });
+                        transformVideo.removeEventListener('ended', ocultarVideoTransformacion);
+                    };
+
+                    transformVideo.addEventListener('ended', ocultarVideoTransformacion);
+                } else {
+                    // Si no configuraste video para este alien, el contador de 8 seg empieza normalmente
+                    setTimeout(iniciarRecarga, 8000); 
+                }
+                // ------------------------------------------------
+
                 omniLight.color.setHex(0x39ff14);
                 omniLight.intensity = 15;
                 gsap.to(omniLight, { intensity: 0, duration: 1.5, delay: 0.15 });
 
-                setTimeout(iniciarRecarga, 8000); 
             }
         }
 
@@ -1216,4 +1276,3 @@
     </script>
 </body>
 </html>
-
