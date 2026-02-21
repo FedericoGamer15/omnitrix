@@ -416,7 +416,7 @@
         // ==========================================
         const RutaModeloGLB = "classic_omnitrix.glb"; 
         
-        const AlturaPantallaAlien = 1.4; 
+        const AlturaPantallaAlien = 1.0; 
         const TamanoPantallaAlien = 0.50;  
         const OpacidadHolograma = 1;    
 
@@ -654,6 +654,8 @@
         });
         const pantallaAlien = new THREE.Mesh(new THREE.CircleGeometry(1.5, 32), pantallaMat);
         pantallaAlien.rotation.x = -Math.PI / 2;
+        // Rota la imagen 180 grados para que el alien aparezca derecho y no de cabeza
+        pantallaAlien.rotation.z = Math.PI; 
 
         // ==========================================
         // GRUPOS Y MODELO PROCEDURAL
