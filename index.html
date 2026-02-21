@@ -436,8 +436,8 @@
         const RutaModeloGLB = "classic_omnitrix.glb"; 
         
         // 🟢 AJUSTES DE LA PANTALLA DEL ALIEN (Sincronización con el objeto discos_dial) 🟢
-        const AlturaPantallaAlien = 1.1; // Ajusta esto para que la imagen no flote ni se hunda en el discos_dial
-        const TamanoPantallaAlien = 0.60;  // Ajusta esto para agrandar o achicar las imágenes
+        const AlturaPantallaAlien = 0.05; // Ajusta esto para que la imagen no flote ni se hunda en el discos_dial
+        const TamanoPantallaAlien = 2.0;  // Ajusta esto para agrandar o achicar las imágenes
 
         // 🛸 PON AQUÍ LAS RUTAS DE TUS IMÁGENES PNG (Asegúrate de que sean transparentes) 🛸
         const RutasAliens = [
@@ -730,6 +730,7 @@
         let modeloUsuario = null;
         let dialUsuario = null;
         let discoDialUsuario = null;
+        let relojArenaVerdeUsuario = null;
         let botonUsuario = null;
         let materialesDinamicos = []; 
 
@@ -745,6 +746,7 @@
                 modeloUsuario = gltf.scene;
                 dialUsuario = null;
                 discoDialUsuario = null;
+                relojArenaVerdeUsuario = null;
                 botonUsuario = null;
                 materialesDinamicos = []; 
                 
@@ -768,6 +770,11 @@
                         // Buscamos específicamente el objeto 'discos_dial' para anclar la imagen ahí
                         if (!discoDialUsuario && nombre.includes('discos_dial')) {
                             discoDialUsuario = child;
+                        }
+
+                        // Buscamos el objeto 'reloj_arena_verde'
+                        if (!relojArenaVerdeUsuario && nombre.includes('reloj_arena_verde')) {
+                            relojArenaVerdeUsuario = child;
                         }
                         
                         if (!botonUsuario && nombre.includes('boton')) {
@@ -817,6 +824,7 @@
                 modeloPrincipalGroup.add(modeloUsuario);
                 
                 console.log("✅ Modelo 3D cargado con éxito desde:", RutaModeloGLB);
+                console.log(relojArenaVerdeUsuario ? "✅ Reloj_Arena_Verde detectado." : "❌ Reloj_Arena_Verde NO detectado.");
 
             }, undefined, function(error) {
                 console.error("❌ Error al cargar tu archivo .GLB:", error);
@@ -863,6 +871,14 @@
 
             if(modeloUsuario && dialUsuario) {
                 gsap.to(dialUsuario.rotation, { y: dialUsuario.rotation.y + (dir * Math.PI / 5), duration: 0.3, ease: "power2.out" });
+                
+                // Contrarrestar la rotación para que estos objetos se queden fijos visualmente mientras el dial gira
+                if (discoDialUsuario) {
+                    gsap.to(discoDialUsuario.rotation, { y: discoDialUsuario.rotation.y - (dir * Math.PI / 5), duration: 0.3, ease: "power2.out" });
+                }
+                if (relojArenaVerdeUsuario) {
+                    gsap.to(relojArenaVerdeUsuario.rotation, { y: relojArenaVerdeUsuario.rotation.y - (dir * Math.PI / 5), duration: 0.3, ease: "power2.out" });
+                }
             }
 
             // Cambiamos la textura de la pantalla física en el dial (Parpadea mientras giras)
@@ -902,7 +918,6 @@
 
                 gsap.to(omniLight, { intensity: 1.5, duration: 0.5 });
                 
-                // Mostrar la imagen del alien cuando se activa
                 gsap.to(pantallaMat, { opacity: 1, duration: 0.5, delay: 0.2, onComplete: () => { estadoActual = 'ACTIVO'; isAnimating = false; actualizarUI(); }});
 
             } else if (estadoActual === 'ACTIVO') {
@@ -1045,13 +1060,3 @@
     </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
