@@ -430,14 +430,15 @@
 
 
         // ==========================================
-        // ⚙️ CONFIGURACIÓN DE MODELO Y SONIDOS
+        // ⚙️ CONFIGURACIÓN DE MODELO Y PANTALLA
         // ==========================================
         // 🛑 PON AQUÍ LA RUTA DE TU MODELO .GLB O .GLTF 🛑
         const RutaModeloGLB = "classic_omnitrix.glb"; 
         
-        // 🟢 AJUSTES DE LA PANTALLA DEL ALIEN (Sincronización con el objeto discos_dial) 🟢
-        const AlturaPantallaAlien = 1.4; // Ajusta esto para que la imagen no flote ni se hunda en el discos_dial
-        const TamanoPantallaAlien = 0.50;  // Ajusta esto para agrandar o achicar las imágenes
+        // 🟢 AJUSTES DE LA PANTALLA DEL ALIEN 🟢
+        const AlturaPantallaAlien = 1.4; // Lo devuelvo a un número normal para que no flote por los aires. Ajústalo de a poquito (ej: 0.1)
+        const TamanoPantallaAlien = 0.50;  // Devuelto a su tamaño original
+        const OpacidadHolograma = 1;    // 👈 CAMBIA ESTO PARA LA TRANSPARENCIA. (1 = Solido, 0.5 = Semi transparente)
 
         // 🛸 PON AQUÍ LAS RUTAS DE TUS IMÁGENES PNG (Asegúrate de que sean transparentes) 🛸
         const RutasAliens = [
@@ -589,7 +590,6 @@
         const colorVerde = '#39ff14';
         const nombresAliens = ["FUEGO", "BESTIA", "DIAMANTE", "XLR8", "MATERIA GRIS", "CUATRO BRAZOS", "INSECTOIDE", "ACUÁTICO", "ULTRA-T", "FANTASMÁTICO"];
 
-        // Cargador de texturas de Three.js
         const textureLoader = new THREE.TextureLoader();
         const texturasAliens = [];
 
@@ -601,7 +601,6 @@
             ctx.closePath(); ctx.stroke(); ctx.shadowColor = colorVerde; ctx.shadowBlur = 20; ctx.stroke(); return new THREE.CanvasTexture(canvas);
         }
 
-        // Cargar las imágenes del usuario o usar el holograma de respaldo si la ruta está vacía
         for (let i = 0; i < 10; i++) {
             if (RutasAliens[i] && RutasAliens[i].trim() !== "") {
                 const tex = textureLoader.load(RutasAliens[i]);
@@ -731,6 +730,7 @@
         let dialUsuario = null;
         let discoDialUsuario = null;
         let relojArenaVerdeUsuario = null;
+        let object16Usuario = null;
         let botonUsuario = null;
         let materialesDinamicos = []; 
 
@@ -746,6 +746,7 @@
                 dialUsuario = null;
                 discoDialUsuario = null;
                 relojArenaVerdeUsuario = null;
+                object16Usuario = null;
                 botonUsuario = null;
                 materialesDinamicos = []; 
                 
@@ -761,18 +762,24 @@
                     if (child.name) {
                         const nombre = child.name.toLowerCase();
                         
-                        // Capturamos el Dial, pero evitamos agarrar los discos por error
+                        // Capturamos el Dial
                         if (!dialUsuario && (nombre.includes('dial') || nombre.includes('nucleo')) && !nombre.includes('discos')) {
                             dialUsuario = child;
                             dialUsuario.position.y = 0.741; 
                         }
 
+                        // Capturamos las piezas interiores
                         if (!discoDialUsuario && nombre.includes('discos_dial')) {
                             discoDialUsuario = child;
                         }
 
                         if (!relojArenaVerdeUsuario && nombre.includes('reloj_arena_verde')) {
                             relojArenaVerdeUsuario = child;
+                        }
+
+                        // Capturamos el Object_16
+                        if (!object16Usuario && nombre.includes('object_16')) {
+                            object16Usuario = child;
                         }
                         
                         if (!botonUsuario && nombre.includes('boton')) {
@@ -808,24 +815,7 @@
                     }
                 });
 
-                // 🛡️ SOLUCIÓN DEFINITIVA: Desvincular partes del Dial
-                // Usamos attach() para sacarlos del dial y pegarlos al modelo principal. 
-                // Esto impide que giren, pero usamos variables para saber cuánto tienen que subir y bajar.
-                if (dialUsuario) {
-                    const offsetElevacion = 1.101 - 0.741; // La diferencia exacta de altura
-
-                    if (discoDialUsuario) {
-                        modeloUsuario.attach(discoDialUsuario);
-                        discoDialUsuario.userData.baseY = discoDialUsuario.position.y;
-                        discoDialUsuario.userData.elevatedY = discoDialUsuario.position.y + offsetElevacion;
-                    }
-                    if (relojArenaVerdeUsuario) {
-                        modeloUsuario.attach(relojArenaVerdeUsuario);
-                        relojArenaVerdeUsuario.userData.baseY = relojArenaVerdeUsuario.position.y;
-                        relojArenaVerdeUsuario.userData.elevatedY = relojArenaVerdeUsuario.position.y + offsetElevacion;
-                    }
-                }
-
+                // Ya NO desvinculamos nada. Las piezas se quedan donde estaban (asegúrate de que estén dentro del dial en tu programa 3D)
                 if (discoDialUsuario) {
                     discoDialUsuario.add(pantallaAlien);
                     pantallaAlien.position.set(0, AlturaPantallaAlien, 0);
@@ -883,12 +873,24 @@
             isAnimating = true;
             gsap.to(dialGroup.rotation, { y: dialGroup.rotation.y + (dir * Math.PI / 5), duration: 0.3, ease: "power2.out", onComplete: () => { isAnimating = false; }});
 
-            // Ahora SOLO giramos el dial. ¡Las otras partes ya no están pegadas a él!
             if(modeloUsuario && dialUsuario) {
+                // Giramos el dial completo
                 gsap.to(dialUsuario.rotation, { y: dialUsuario.rotation.y + (dir * Math.PI / 5), duration: 0.3, ease: "power2.out" });
+
+                // MÁGIA: Contra-rotamos los objetos interiores en la dirección opuesta a la misma velocidad para que queden fijos
+                if (discoDialUsuario) {
+                    gsap.to(discoDialUsuario.rotation, { y: discoDialUsuario.rotation.y - (dir * Math.PI / 5), duration: 0.3, ease: "power2.out" });
+                }
+                if (relojArenaVerdeUsuario) {
+                    gsap.to(relojArenaVerdeUsuario.rotation, { y: relojArenaVerdeUsuario.rotation.y - (dir * Math.PI / 5), duration: 0.3, ease: "power2.out" });
+                }
+                if (object16Usuario) {
+                    gsap.to(object16Usuario.rotation, { y: object16Usuario.rotation.y - (dir * Math.PI / 5), duration: 0.3, ease: "power2.out" });
+                }
             }
 
-            gsap.to(pantallaMat, { opacity: 1, duration: 0.15, yoyo: true, repeat: 1, onRepeat: () => { pantallaMat.map = texturasAliens[alienSeleccionado]; }});
+            // Cambiamos la textura de la pantalla física en el dial y respetamos la opacidad configurada
+            gsap.to(pantallaMat, { opacity: 0, duration: 0.15, yoyo: true, repeat: 1, onRepeat: () => { pantallaMat.map = texturasAliens[alienSeleccionado]; }, onComplete: () => { pantallaMat.opacity = OpacidadHolograma; }});
         }
 
         function toggleOmnitrix() {
@@ -917,23 +919,16 @@
                         });
                     }
 
-                    // Subimos el dial, los discos y el reloj de arena simultáneamente
+                    // Al subir el dial, las partes interiores subirán con él porque vuelven a ser hijas
                     if (dialUsuario) {
                         gsap.to(dialUsuario.position, { y: 1.101, duration: 0.5, delay: 0.1, ease: "back.out(1.5)" });
-                        
-                        if (discoDialUsuario) {
-                            gsap.to(discoDialUsuario.position, { y: discoDialUsuario.userData.elevatedY, duration: 0.5, delay: 0.1, ease: "back.out(1.5)" });
-                        }
-                        if (relojArenaVerdeUsuario) {
-                            gsap.to(relojArenaVerdeUsuario.position, { y: relojArenaVerdeUsuario.userData.elevatedY, duration: 0.5, delay: 0.1, ease: "back.out(1.5)" });
-                        }
                     }
                 }
 
                 gsap.to(omniLight, { intensity: 1.5, duration: 0.5 });
                 
-                // Mantuve tu configuración de opacidad en 0.8
-                gsap.to(pantallaMat, { opacity: 0.8, duration: 0.5, delay: 0.2, onComplete: () => { estadoActual = 'ACTIVO'; isAnimating = false; actualizarUI(); }});
+                // Usamos la nueva variable OpacidadHolograma
+                gsap.to(pantallaMat, { opacity: OpacidadHolograma, duration: 0.5, delay: 0.2, onComplete: () => { estadoActual = 'ACTIVO'; isAnimating = false; actualizarUI(); }});
 
             } else if (estadoActual === 'ACTIVO') {
                 isAnimating = true;
@@ -946,16 +941,12 @@
                 gsap.to(nucleoGroup.position, { y: 0.5, duration: 0.15, ease: "power4.in" });
                 
                 if(modeloUsuario && dialUsuario) {
-                    // Bajamos todas las partes de vuelta a su posición original
                     gsap.to(dialUsuario.position, { 
                         y: 0.741, 
                         duration: 0.15, 
                         ease: "power4.in",
                         onComplete: () => { pantallaMat.opacity = 0; }
                     });
-                    
-                    if (discoDialUsuario) gsap.to(discoDialUsuario.position, { y: discoDialUsuario.userData.baseY, duration: 0.15, ease: "power4.in" });
-                    if (relojArenaVerdeUsuario) gsap.to(relojArenaVerdeUsuario.position, { y: relojArenaVerdeUsuario.userData.baseY, duration: 0.15, ease: "power4.in" });
                 } else {
                     setTimeout(() => { pantallaMat.opacity = 0; }, 150);
                 }
@@ -1035,10 +1026,11 @@
                         let obj = intersect.object;
                         while(obj) {
                             if (botonUsuario && obj === botonUsuario) tocoBoton = true;
-                            // ¡Importante! Ahora verificamos también si tocó las partes desvinculadas del dial
+                            // Ahora verificamos también si tocó las partes del centro
                             if (dialUsuario && obj === dialUsuario) tocoDial = true;
                             if (discoDialUsuario && obj === discoDialUsuario) tocoDial = true;
                             if (relojArenaVerdeUsuario && obj === relojArenaVerdeUsuario) tocoDial = true;
+                            if (object16Usuario && obj === object16Usuario) tocoDial = true;
                             obj = obj.parent;
                         }
                     });
@@ -1076,4 +1068,3 @@
     </script>
 </body>
 </html>
-
