@@ -40,26 +40,26 @@ GSAP (GreenSock): Librería líder en animaciones para transiciones suaves, desv
 
 Para que el proyecto funcione correctamente "out-of-the-box", asegúrate de organizar tus recursos en la siguiente estructura de carpetas:
 
-/tu-repositorio
-│
-├── omnitrix.html              # Archivo principal (Todo el código)
-├── classic_omnitrix.glb       # Tu modelo 3D del Omnitrix
-│
-├── /aliens/256x256/           # Siluetas PNG transparentes de los aliens
-│   ├── fuego.png
-│   ├── bestia.png
-│   └── ... (hasta 10 aliens)
-│
-├── /cinematicas/              # Videos de introducción (.mp4)
-│   ├── ben-10-classic_intro.mp4
-│   └── ben-10-classic_obtain-the-omnitrix.mp4
-│
-├── /videos_aliens/            # Cinemáticas de transformación (.mp4)
-│   ├── fuego.mp4
-│   ├── bestia.mp4
-│   └── ... 
-│
-└── /sonidos/                  # Efectos de audio (.mp3 / .wav)
+    /tu-repositorio
+    │
+    ├── index.html              # Archivo principal (Todo el código)
+    ├── classic_omnitrix.glb       # Tu modelo 3D del Omnitrix
+    │
+    ├── /aliens/256x256/           # Siluetas PNG transparentes de los aliens
+    │   ├── fuego.png
+    │   ├── bestia.png
+    │   └── ... (hasta 10 aliens)
+    │
+    ├── /cinematicas/              # Videos de introducción (.mp4)
+    │   ├── ben-10-classic_intro.mp4
+    │   └── ben-10-classic_obtain-the-omnitrix.mp4
+    │
+    ├── /videos_aliens/            # Cinemáticas de transformación (.mp4)
+    │   ├── fuego.mp4
+    │   ├── bestia.mp4
+    │   └── ... 
+    │
+    └── /sonidos/                  # Efectos de audio (.mp3 / .wav)
     ├── omnitrix_activate.mp3
     ├── omnitrix_girar-dial.mp3
     ├── omnitrix_transform.mp3
