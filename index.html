@@ -293,6 +293,19 @@
             color: #39ff14;
             border-color: #39ff14;
         }
+
+        /* 🎬 CSS PARA EL CONTENEDOR DE TRANSFORMACIÓN 🎬 */
+        #transform-video-container {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background-color: #000;
+            z-index: 10000; /* Por encima de la interfaz para tapar todo */
+            display: none;
+            flex-direction: column; justify-content: center; align-items: center;
+        }
+        #transform-video {
+            width: 100%; height: 100%; object-fit: cover;
+        }
         
         /* 🛠️ CSS PARA EL PANEL SECRETO DE AJUSTES 🛠️ */
         #debug-panel {
@@ -352,6 +365,11 @@
         <button id="btn-start-experience">INICIAR EXPERIENCIA</button>
         <video id="intro-video" playsinline></video>
         <button id="btn-skip-video">Saltar ⏭</button>
+    </div>
+
+    <!-- 🎬 CONTENEDOR DE VIDEOS DE TRANSFORMACIÓN (Sin botón de saltar) 🎬 -->
+    <div id="transform-video-container">
+        <video id="transform-video" playsinline></video>
     </div>
 
     <div id="landscape-warning">
@@ -500,12 +518,11 @@
         // ==========================================
         const RutaModeloGLB = "classic_omnitrix.glb"; 
         
-        // CORRECCIÓN: Ahora son "let" para que el código del panel no se trabe al intentar modificarlas
         let AlturaPantallaAlien = 1.01; 
         let TamanoPantallaAlien = 0.58;  
         let OpacidadHolograma = 1;    
 
-        // 🟢 NUEVO: AJUSTES PARA CENTRAR EL HOLOGRAMA 🟢
+        // 🟢 AJUSTES PARA CENTRAR EL HOLOGRAMA 🟢
         let DesplazamientoX = -0.07; 
         let DesplazamientoZ = 0.03;  
 
@@ -1056,14 +1073,14 @@
                 const transformVideo = document.getElementById('transform-video');
                 const videoSrc = VideosTransformacion[alienSeleccionado];
 
-                if (videoSrc && videoSrc.trim() !== "") {
+                if (transformVideoContainer && transformVideo && videoSrc && videoSrc.trim() !== "") {
                     // Mostrar video justo en el pico del flash (0.15s) para camuflar el corte
                     setTimeout(() => {
                         transformVideoContainer.style.display = 'block';
                         transformVideo.src = videoSrc;
                         transformVideo.play().catch(e => {
                             console.log("Error al reproducir transformación:", e);
-                            // Si el video falla, inicia el temporizador por seguridad
+                            // Si el navegador bloquea el video, inicia el temporizador por seguridad
                             setTimeout(iniciarRecarga, 8000); 
                         });
                     }, 150);
@@ -1090,7 +1107,7 @@
 
                     transformVideo.addEventListener('ended', ocultarVideoTransformacion);
                 } else {
-                    // Si no configuraste video para este alien, el contador de 8 seg empieza normalmente
+                    // Si no configuraste video para este alien o hubo error, el contador de 8 seg empieza normalmente
                     setTimeout(iniciarRecarga, 8000); 
                 }
                 // ------------------------------------------------
