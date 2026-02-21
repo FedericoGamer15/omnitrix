@@ -158,6 +158,32 @@
             gap: 10px;
             pointer-events: auto;
         }
+        .credits-buttons {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        #patreon-btn {
+            background-color: #111;
+            color: #ff424d;
+            border: 1px solid #ff424d;
+            padding: 8px 16px;
+            font-size: 14px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Courier New', Courier, monospace;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        #patreon-btn:hover {
+            background-color: #ff424d;
+            color: #fff;
+            box-shadow: 0 0 15px rgba(255, 66, 77, 0.6);
+        }
         #credits-btn {
             background-color: #111;
             color: #39ff14;
@@ -463,7 +489,15 @@
             Hecho por <strong>Federico Cámara</strong><br>
             <a href="https://github.com/FedericoGamer15/omnitrix" target="_blank">🔗 Ver en GitHub</a>
         </div>
-        <button id="credits-btn" onclick="document.getElementById('credits-panel').classList.toggle('show'); event.stopPropagation();">[Creador]</button>
+        <div class="credits-buttons">
+            <!-- BOTÓN DE PATREON -->
+            <a id="patreon-btn" href="https://patreon.com/Sr_Frederick" target="_blank" title="Apoya el proyecto en Patreon">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M15.386.524c-4.764 0-8.64 3.876-8.64 8.64 0 4.75 3.876 8.613 8.64 8.613 4.75 0 8.614-3.864 8.614-8.613C24 4.4 20.136.524 15.386.524M.003 23.537h4.22V.524H.003v23.013z"/></svg>
+                Patreon
+            </a>
+            <!-- BOTÓN CREADOR -->
+            <button id="credits-btn" onclick="document.getElementById('credits-panel').classList.toggle('show'); event.stopPropagation();">[Creador]</button>
+        </div>
     </div>
 
     <div id="flash-overlay"></div>
@@ -573,8 +607,8 @@
         let DesplazamientoX = -0.07; 
         let DesplazamientoZ = 0.03;  
 
-        let IntensidadAmbiente = 0;    
-        let IntensidadDireccional = 1.0; 
+        let IntensidadAmbiente = 3;    
+        let IntensidadDireccional = 5; 
 
         const RutasAliens = [
             "aliens/256x256/fuego.png",         
@@ -1212,7 +1246,7 @@
         const raycaster = new THREE.Raycaster();
         const mouse = new THREE.Vector2();
         window.addEventListener('pointerdown', (e) => {
-            if(e.target.tagName === 'BUTTON' || e.target.tagName === 'LABEL' || e.target.tagName === 'INPUT') return;
+            if(e.target.tagName === 'BUTTON' || e.target.tagName === 'LABEL' || e.target.tagName === 'INPUT' || e.target.closest('a')) return;
             
             mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
             mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
