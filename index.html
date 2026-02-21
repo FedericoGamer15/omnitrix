@@ -436,8 +436,8 @@
         const RutaModeloGLB = "classic_omnitrix.glb"; 
         
         // 🟢 AJUSTES DE LA PANTALLA DEL ALIEN (Sincronización con el objeto discos_dial) 🟢
-        const AlturaPantallaAlien = 0.05; // Ajusta esto para que la imagen no flote ni se hunda en el discos_dial
-        const TamanoPantallaAlien = 2.0;  // Ajusta esto para agrandar o achicar las imágenes
+        const AlturaPantallaAlien = 1.1; // Ajusta esto para que la imagen no flote ni se hunda en el discos_dial
+        const TamanoPantallaAlien = 0.60;  // Ajusta esto para agrandar o achicar las imágenes
 
         // 🛸 PON AQUÍ LAS RUTAS DE TUS IMÁGENES PNG (Asegúrate de que sean transparentes) 🛸
         const RutasAliens = [
@@ -918,7 +918,7 @@
 
                 gsap.to(omniLight, { intensity: 1.5, duration: 0.5 });
                 
-                gsap.to(pantallaMat, { opacity: 1, duration: 0.5, delay: 0.2, onComplete: () => { estadoActual = 'ACTIVO'; isAnimating = false; actualizarUI(); }});
+                gsap.to(pantallaMat, { opacity: 0.8, duration: 0.5, delay: 0.2, onComplete: () => { estadoActual = 'ACTIVO'; isAnimating = false; actualizarUI(); }});
 
             } else if (estadoActual === 'ACTIVO') {
                 isAnimating = true;
@@ -1060,3 +1060,4 @@
     </script>
 </body>
 </html>
+
