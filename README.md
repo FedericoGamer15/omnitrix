@@ -1,4 +1,6 @@
-👽 Omnitrix 3D Interactivo - Ben 10 Clásico
+   **👽 Omnitrix 3D Interactivo - Ben 10 Clásico**
+
+<img width="521" height="584" alt="omnitrix_image" src="https://github.com/user-attachments/assets/5f1755e4-0380-4058-b4f9-cdad207b54a8" />
 
 Un simulador web inmersivo y altamente personalizable del Omnitrix Clásico de Ben 10, construido íntegramente con tecnologías web estándar, renderizado 3D en tiempo real y animaciones fluidas.
 
@@ -146,7 +148,7 @@ boton: El botón lateral que se presiona.
 
 📝 Licencia y Créditos
 
-Creado con pasión por [Federico Cámara].
+Creado con pasión e imaginación por [Federico Cámara] y usando vibecoding (Gemini 3.1 Pro)
 Siéntete libre de clonar (fork), modificar y mejorar este proyecto. Si lo usas de base para tus propias creaciones, ¡una mención en los créditos es más que bienvenida!
 
 Ben 10 es propiedad de Cartoon Network / Warner Bros. Discovery. Este proyecto es una recreación fan-made sin fines de lucro.
