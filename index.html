@@ -1275,9 +1275,42 @@
         document.getElementById('slider-l-amb').addEventListener('input', updateHologramSettings);
         document.getElementById('slider-l-dir').addEventListener('input', updateHologramSettings);
 
+        // Variables para recordar si los videos estaban reproduciéndose antes de girar el celular
+        let estabaReproduciendoIntro = false;
+        let estabaReproduciendoTransformacion = false;
 
         window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight);
+            // Ajustar el Canvas 3D al nuevo tamaño de pantalla
+            camera.aspect = window.innerWidth / window.innerHeight; 
+            camera.updateProjectionMatrix(); 
+            renderer.setSize(window.innerWidth, window.innerHeight);
+
+            // Lógica Inteligente: Pausar/Reanudar videos al girar el celular
+            const esVertical = window.innerHeight > window.innerWidth && window.innerWidth < 800;
+            const videoIntroElem = document.getElementById('intro-video');
+            const videoTransformElem = document.getElementById('transform-video');
+
+            if (esVertical) {
+                // Si gira a vertical, pausamos los videos y recordamos su estado
+                if (videoIntroElem && !videoIntroElem.paused && !videoIntroElem.ended && videoIntroElem.style.display !== 'none') {
+                    videoIntroElem.pause();
+                    estabaReproduciendoIntro = true;
+                }
+                if (videoTransformElem && !videoTransformElem.paused && !videoTransformElem.ended && document.getElementById('transform-video-container').style.display === 'block') {
+                    videoTransformElem.pause();
+                    estabaReproduciendoTransformacion = true;
+                }
+            } else {
+                // Si gira a horizontal, reanudamos exactamente donde se quedaron
+                if (estabaReproduciendoIntro && videoIntroElem) {
+                    videoIntroElem.play().catch(e => console.log(e));
+                    estabaReproduciendoIntro = false;
+                }
+                if (estabaReproduciendoTransformacion && videoTransformElem) {
+                    videoTransformElem.play().catch(e => console.log(e));
+                    estabaReproduciendoTransformacion = false;
+                }
+            }
         });
         actualizarUI();
 
