@@ -165,7 +165,6 @@
             gap: 10px;
             align-items: center;
         }
-        /* 🔴 BOTÓN PATREON ICONO REDONDO 🔴 */
         #patreon-icon-btn {
             background-color: #111;
             color: #ff424d;
@@ -235,7 +234,32 @@
             text-decoration: underline;
         }
 
-        /* 🚨 AVISO DE PANTALLA VERTICAL 🚨 */
+        #master-control-indicator {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.85);
+            border: 2px solid #39ff14;
+            color: #39ff14;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', Courier, monospace;
+            font-weight: bold;
+            font-size: 14px;
+            display: none;
+            cursor: pointer;
+            z-index: 1000;
+            box-shadow: 0 0 15px rgba(57, 255, 20, 0.4);
+            transition: all 0.2s;
+            pointer-events: auto;
+            text-transform: uppercase;
+        }
+        #master-control-indicator:hover {
+            background: #39ff14;
+            color: #000;
+            box-shadow: 0 0 25px rgba(57, 255, 20, 0.8);
+        }
+
         #landscape-warning {
             display: none;
             position: fixed;
@@ -273,6 +297,42 @@
             width: 100%; height: 100%; background-color: #000; z-index: 2000000; 
             display: flex; flex-direction: column; justify-content: center; align-items: center;
         }
+        
+        /* 🔋 ESTILOS DE LA BARRA DE CARGA 🔋 */
+        #loading-container {
+            width: 80%;
+            max-width: 400px;
+            text-align: center;
+            z-index: 2000002;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        #loading-text {
+            color: #39ff14;
+            font-family: 'Courier New', Courier, monospace;
+            font-weight: bold;
+            font-size: 18px;
+            text-shadow: 0 0 10px #39ff14;
+            letter-spacing: 2px;
+        }
+        #loading-bar-bg {
+            width: 100%;
+            height: 25px;
+            background-color: #111;
+            border: 2px solid #39ff14;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 0 15px rgba(57, 255, 20, 0.3);
+        }
+        #loading-progress {
+            width: 0%;
+            height: 100%;
+            background-color: #39ff14;
+            box-shadow: 0 0 15px #39ff14;
+            transition: width 0.3s ease;
+        }
+
         #intro-video { width: 100%; height: 100%; object-fit: cover; display: none; }
         #btn-start-experience {
             background-color: #111; color: #39ff14; border: 3px solid #39ff14;
@@ -280,6 +340,7 @@
             cursor: pointer; text-transform: uppercase; box-shadow: 0 0 20px rgba(57, 255, 20, 0.6);
             font-family: 'Courier New', Courier, monospace; letter-spacing: 2px;
             transition: transform 0.2s, background-color 0.2s; z-index: 2000001;
+            display: none; /* Se oculta al principio hasta que cargue */
         }
         #btn-start-experience:hover { background-color: #39ff14; color: #000; }
         #btn-start-experience:active { transform: scale(0.95); }
@@ -298,7 +359,6 @@
         }
         #transform-video { width: 100%; height: 100%; object-fit: cover; }
         
-        /* 🛠️ CSS PARA EL PANEL SECRETO DE AJUSTES 🛠️ */
         #debug-panel {
             position: absolute; top: 20px; left: 20px; background: rgba(0, 0, 0, 0.9);
             border: 2px solid #ffaa00; padding: 15px; border-radius: 10px; z-index: 999999;
@@ -311,7 +371,6 @@
         .debug-control input[type=range] { width: 200px; }
         .debug-hint { font-size: 11px; color: #aaa; margin-top: 10px; max-width: 200px; font-family: Arial, sans-serif; }
 
-        /* 👑 CSS PARA LA VENTANA MODAL VIP (PATREON) 👑 */
         #patreon-modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0, 0, 0, 0.85); z-index: 99999; display: none;
@@ -341,23 +400,20 @@
         }
         .patreon-login-btn:hover { background-color: #ff5e67; box-shadow: 0 0 20px rgba(255, 66, 77, 0.6); transform: scale(1.05); }
 
-        /* 🖼️ ZONAS DE ANUNCIOS 🖼️ */
         .ad-zone {
             position: absolute;
-            z-index: 5; /* Por debajo de los botones pero encima del 3D */
+            z-index: 5;
             pointer-events: auto;
             display: flex;
             justify-content: center;
             align-items: center;
             overflow: hidden;
         }
-        /* PC: Banners Laterales */
         @media screen and (min-width: 1025px) {
             #ad-left { left: 10px; top: 50%; transform: translateY(-50%); width: 160px; height: 600px; }
             #ad-right { right: 10px; top: 50%; transform: translateY(-50%); width: 160px; height: 600px; }
             #ad-mobile { display: none; }
         }
-        /* Móvil: Banner Horizontal Inferior (arriba de los controles) */
         @media screen and (max-width: 1024px) {
             #ad-left, #ad-right { display: none; }
             #ad-mobile { bottom: 90px; left: 50%; transform: translateX(-50%); width: 320px; height: 50px; }
@@ -371,6 +427,15 @@
 <body>
 
     <div id="intro-video-container">
+        
+        <!-- 🔋 CONTENEDOR DE BARRA DE CARGA 🔋 -->
+        <div id="loading-container">
+            <div id="loading-text">SINCRONIZANDO ADN... 0%</div>
+            <div id="loading-bar-bg">
+                <div id="loading-progress"></div>
+            </div>
+        </div>
+
         <button id="btn-start-experience">INICIAR EXPERIENCIA</button>
         <video id="intro-video" playsinline></video>
         <button id="btn-skip-video">Saltar ⏭</button>
@@ -387,13 +452,18 @@
         <p>Para disfrutar al máximo del Omnitrix, por favor pon tu dispositivo en modo horizontal.</p>
     </div>
 
+    <!-- 🟢 INDICADOR CONTROL MAESTRO 🟢 -->
+    <div id="master-control-indicator" title="Desactivar Control Maestro">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" style="margin-right:5px; vertical-align: middle;"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v4h-2zm0 6h2v2h-2z"/></svg>
+        Control Maestro
+    </div>
+
     <!-- 👑 MODAL VIP PATREON 👑 -->
     <div id="patreon-modal-overlay">
         <div class="patreon-modal-box">
             <button class="close-modal-btn" id="btn-close-patreon">✖</button>
             <h2>Modo VIP</h2>
             <p>Conéctate con tu cuenta de Patreon (Nivel Inteligencia Galván) para bloquear los anuncios permanentemente y apoyar el desarrollo de más alienígenas.</p>
-            <!-- 🔗 ENLACE REAL DE OAUTH DE PATREON CONFIGURADO -->
             <a href="https://www.patreon.com/oauth2/authorize?response_type=code&client_id=o5iVmLPm2ZuhxjZjCcj8n4MsmFcwwDO7Pi1Eme5XNmn_CuI_SHmCNuXBo_PH2KZH&redirect_uri=https://omnitrix-lac.vercel.app/api/auth" class="patreon-login-btn">
                 <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M15.386.524c-4.764 0-8.64 3.876-8.64 8.64 0 4.75 3.876 8.613 8.64 8.613 4.75 0 8.614-3.864 8.614-8.613C24 4.4 20.136.524 15.386.524M.003 23.537h4.22V.524H.003v23.013z"/></svg>
                 Conectar Patreon
@@ -480,11 +550,9 @@
             <a href="https://github.com/FedericoGamer15/omnitrix" target="_blank">🔗 Ver en GitHub</a>
         </div>
         <div class="credits-buttons">
-            <!-- BOTÓN DE PATREON ICONO -->
             <button id="patreon-icon-btn" title="Desbloquear Modo VIP">
                 <svg viewBox="0 0 24 24"><path d="M15.386.524c-4.764 0-8.64 3.876-8.64 8.64 0 4.75 3.876 8.613 8.64 8.613 4.75 0 8.614-3.864 8.614-8.613C24 4.4 20.136.524 15.386.524M.003 23.537h4.22V.524H.003v23.013z"/></svg>
             </button>
-            <!-- BOTÓN CREADOR -->
             <button id="credits-btn" onclick="document.getElementById('credits-panel').classList.toggle('show'); event.stopPropagation();">[Creador]</button>
         </div>
     </div>
@@ -493,18 +561,56 @@
     <div id="canvas-container"></div>
 
     <script>
-        // --- 🔒 LÓGICA VIP DE OCULTAR ANUNCIOS 🔒 ---
-        // Esto lee si el usuario fue verificado por Patreon y oculta las cajas de publicidad.
+        // --- ⚙️ VARIABLES CONTROL MAESTRO ---
+        let masterControl = false;
+        let recargaTimeout = null;
+        let clickCountControlMaestro = 0;
+
+        function activarControlMaestro(silencioso = false) {
+            masterControl = true;
+            if (recargaTimeout) {
+                clearTimeout(recargaTimeout);
+                recargaTimeout = null;
+            }
+            document.getElementById('master-control-indicator').style.display = 'block';
+            actualizarUI();
+            
+            if (!silencioso) {
+                const audioActivacion = new Audio("sonidos/omnitrix_activate.mp3");
+                audioActivacion.play().catch(e=>{});
+                
+                const flash = document.getElementById('flash-overlay');
+                flash.style.backgroundColor = '#39ff14';
+                flash.style.opacity = 0.5;
+                gsap.to(flash, { opacity: 0, duration: 0.5 });
+            }
+        }
+
+        function desactivarControlMaestro() {
+            masterControl = false;
+            document.getElementById('master-control-indicator').style.display = 'none';
+            actualizarUI();
+            
+            if (typeof estadoActual !== 'undefined' && estadoActual === 'TRANSFORMADO') {
+                clickCountControlMaestro = 0;
+                recargaTimeout = setTimeout(iniciarRecarga, 8000);
+            }
+        }
+
+        document.getElementById('master-control-indicator').addEventListener('click', desactivarControlMaestro);
+
         if (document.cookie.includes('isVIP=true')) {
             document.querySelectorAll('.ad-zone').forEach(ad => ad.style.display = 'none');
-            // Opcional: Puedes ocultar el botón de Patreon si ya es VIP
             const pBtn = document.getElementById('patreon-icon-btn');
             if(pBtn) pBtn.style.display = 'none';
+            
+            window.addEventListener('DOMContentLoaded', () => {
+                activarControlMaestro(true);
+            });
         }
 
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-        // LÓGICA MODAL PATREON
         const patreonBtn = document.getElementById('patreon-icon-btn');
         const patreonModal = document.getElementById('patreon-modal-overlay');
         const closePatreonBtn = document.getElementById('btn-close-patreon');
@@ -518,14 +624,116 @@
         });
 
         // ==========================================
-        // 🎬 CONFIGURACIÓN DE VIDEOS INICIALES 🎬
+        // 🎬 CONFIGURACIÓN DE VIDEOS INICIALES Y PRECARGA 🎬
         // ==========================================
-        const RutaVideoIntro = "cinematicas/ben-10-classic_intro.mp4"; 
-        const RutaVideoObtencion = "cinematicas/ben-10-classic_obtain-the-omnitrix.mp4"; 
+        // IMPORTANTE: Ahora usamos "let" para poder reemplazarlas por los archivos cacheados
+        let RutaVideoIntro = "cinematicas/ben-10-classic_intro.mp4"; 
+        let RutaVideoObtencion = "cinematicas/ben-10-classic_obtain-the-omnitrix.mp4"; 
+        
+        let VideosTransformacion = [
+            "videos_aliens/fuego.mp4",         
+            "videos_aliens/bestia.mp4",        
+            "videos_aliens/diamante.mp4",      
+            "videos_aliens/xlr8.mp4",          
+            "videos_aliens/materia_gris.mp4",  
+            "videos_aliens/cuatro_brazos.mp4", 
+            "videos_aliens/insectoide.mp4",    
+            "videos_aliens/acuatico.mp4",      
+            "videos_aliens/ultra-t.mp4",       
+            "videos_aliens/fantasmatico.mp4"   
+        ];
+
+        // --- SISTEMA DE PRECARGA (XHR BLOBS) ---
+        const btnStartExp = document.getElementById('btn-start-experience');
+        const loadingContainer = document.getElementById('loading-container');
+        const loadingProgress = document.getElementById('loading-progress');
+        const loadingText = document.getElementById('loading-text');
+
+        const archivosAPrecargar = [];
+        if (RutaVideoIntro) archivosAPrecargar.push({ id: 'intro', url: RutaVideoIntro });
+        if (RutaVideoObtencion) archivosAPrecargar.push({ id: 'obtencion', url: RutaVideoObtencion });
+        
+        VideosTransformacion.forEach((vid, i) => {
+            if (vid) archivosAPrecargar.push({ id: `trans_${i}`, url: vid });
+        });
+
+        const preloadedUrls = {};
+        const loadedWeights = new Array(archivosAPrecargar.length).fill(0);
+        let archivosListos = 0;
+
+        function actualizarBarra() {
+            // Promedia el progreso de todos los archivos
+            const totalProgress = loadedWeights.reduce((a, b) => a + b, 0) / archivosAPrecargar.length;
+            const porcentaje = Math.min(Math.round(totalProgress * 100), 100);
+            
+            loadingProgress.style.width = porcentaje + '%';
+            loadingText.innerText = `SINCRONIZANDO ADN... ${porcentaje}%`;
+
+            if (archivosListos === archivosAPrecargar.length) {
+                // Todo cargado
+                setTimeout(() => {
+                    loadingContainer.style.display = 'none';
+                    btnStartExp.style.display = 'inline-block';
+                    
+                    // Reemplazar rutas originales con los Blobs guardados en memoria
+                    if(preloadedUrls['intro']) RutaVideoIntro = preloadedUrls['intro'];
+                    if(preloadedUrls['obtencion']) RutaVideoObtencion = preloadedUrls['obtencion'];
+                    VideosTransformacion.forEach((_, i) => {
+                        if(preloadedUrls[`trans_${i}`]) VideosTransformacion[i] = preloadedUrls[`trans_${i}`];
+                    });
+                }, 500); // Pequeño retraso para que el usuario vea el 100%
+            }
+        }
+
+        if (archivosAPrecargar.length > 0) {
+            archivosAPrecargar.forEach((archivo, index) => {
+                const xhr = new XMLHttpRequest();
+                xhr.open('GET', archivo.url, true);
+                xhr.responseType = 'blob';
+                
+                xhr.onprogress = (e) => {
+                    if (e.lengthComputable) {
+                        loadedWeights[index] = e.loaded / e.total;
+                    } else {
+                        // Si el servidor no dice cuánto pesa, asumimos un progreso artificial
+                        loadedWeights[index] = 0.5; 
+                    }
+                    actualizarBarra();
+                };
+                
+                xhr.onload = () => {
+                    if (xhr.status === 200) {
+                        loadedWeights[index] = 1;
+                        archivosListos++;
+                        // Crea una URL local en memoria para evitar buffering al reproducir
+                        preloadedUrls[archivo.id] = URL.createObjectURL(xhr.response);
+                        actualizarBarra();
+                    } else {
+                        // Si da error 404, marcamos como cargado para no trabar la barra
+                        loadedWeights[index] = 1;
+                        archivosListos++;
+                        actualizarBarra();
+                    }
+                };
+                
+                xhr.onerror = () => {
+                    // Fallback en caso de errores de CORS/Red
+                    loadedWeights[index] = 1;
+                    archivosListos++;
+                    actualizarBarra();
+                };
+                
+                xhr.send();
+            });
+        } else {
+            // Si no hay archivos, mostramos el botón directamente
+            loadingContainer.style.display = 'none';
+            btnStartExp.style.display = 'inline-block';
+        }
+        // ---------------------------------------
 
         const introContainer = document.getElementById('intro-video-container');
         const introVideo = document.getElementById('intro-video');
-        const btnStartExp = document.getElementById('btn-start-experience');
         const btnSkipVideo = document.getElementById('btn-skip-video');
         let isFadingOut = false;
 
@@ -553,21 +761,23 @@
             });
         }
 
-        if (RutaVideoIntro && RutaVideoIntro.trim() !== "") {
-            let videoActual = 1;
+        // El resto del código de los videos
+        let videoActual = 1;
 
-            btnStartExp.addEventListener('click', () => {
-                const esVerticalActualmente = window.innerHeight > window.innerWidth && window.innerWidth < 1024;
-                if (esVerticalActualmente) return; 
+        btnStartExp.addEventListener('click', () => {
+            const esVerticalActualmente = window.innerHeight > window.innerWidth && window.innerWidth < 1024;
+            if (esVerticalActualmente) return; 
 
-                try {
-                    const docEl = document.documentElement;
-                    if (docEl.requestFullscreen) docEl.requestFullscreen().catch(e=>{});
-                    else if (docEl.webkitRequestFullscreen) docEl.webkitRequestFullscreen().catch(e=>{});
-                } catch(e) {}
+            try {
+                const docEl = document.documentElement;
+                if (docEl.requestFullscreen) docEl.requestFullscreen().catch(e=>{});
+                else if (docEl.webkitRequestFullscreen) docEl.webkitRequestFullscreen().catch(e=>{});
+            } catch(e) {}
 
-                if (audioCtx.state === 'suspended') audioCtx.resume(); 
-                btnStartExp.style.display = 'none'; 
+            if (audioCtx.state === 'suspended') audioCtx.resume(); 
+            btnStartExp.style.display = 'none'; 
+            
+            if (RutaVideoIntro && RutaVideoIntro.trim() !== "") {
                 btnSkipVideo.style.display = 'block'; 
                 introVideo.style.display = 'block'; 
                 introVideo.src = RutaVideoIntro;
@@ -575,28 +785,27 @@
                     console.log("Error al reproducir video:", e);
                     finalizarVideos(); 
                 });
-            });
+            } else {
+                finalizarVideos();
+            }
+        });
 
-            btnSkipVideo.addEventListener('click', () => {
-                introVideo.dispatchEvent(new Event('ended'));
-            });
+        btnSkipVideo.addEventListener('click', () => {
+            introVideo.dispatchEvent(new Event('ended'));
+        });
 
-            introVideo.addEventListener('ended', () => {
-                if (videoActual === 1 && RutaVideoObtencion && RutaVideoObtencion.trim() !== "") {
-                    videoActual = 2;
-                    introVideo.src = RutaVideoObtencion;
-                    introVideo.play().catch(e => {
-                        console.log("Error al reproducir segundo video:", e);
-                        finalizarVideos();
-                    });
-                } else {
+        introVideo.addEventListener('ended', () => {
+            if (videoActual === 1 && RutaVideoObtencion && RutaVideoObtencion.trim() !== "") {
+                videoActual = 2;
+                introVideo.src = RutaVideoObtencion;
+                introVideo.play().catch(e => {
+                    console.log("Error al reproducir segundo video:", e);
                     finalizarVideos();
-                }
-            });
-        } else {
-            introContainer.style.display = 'none';
-        }
-
+                });
+            } else {
+                finalizarVideos();
+            }
+        });
 
         // ==========================================
         // ⚙️ CONFIGURACIÓN DE MODELO Y PANTALLA
@@ -611,7 +820,7 @@
         let DesplazamientoZ = 0.03;  
 
         let IntensidadAmbiente = 0;    
-        let IntensidadDireccional = 3; 
+        let IntensidadDireccional = 5; 
 
         const RutasAliens = [
             "aliens/256x256/fuego.png",         
@@ -624,19 +833,6 @@
             "aliens/256x256/acuatico.png",      
             "aliens/256x256/ultra-t.png",       
             "aliens/256x256/fantasmatico.png"   
-        ];
-
-        const VideosTransformacion = [
-            "videos_aliens/fuego.mp4",         
-            "videos_aliens/bestia.mp4",        
-            "videos_aliens/diamante.mp4",      
-            "videos_aliens/xlr8.mp4",          
-            "videos_aliens/materia_gris.mp4",  
-            "videos_aliens/cuatro_brazos.mp4", 
-            "videos_aliens/insectoide.mp4",    
-            "videos_aliens/acuatico.mp4",      
-            "videos_aliens/ultra-t.mp4",       
-            "videos_aliens/fantasmatico.mp4"   
         ];
 
         const MisSonidos = {
@@ -1041,6 +1237,14 @@
                 btnAccion.innerText = '¡Transformar!';
                 btnIzquierda.style.display = 'block'; btnDerecha.style.display = 'block';
                 textoAlien.innerText = nombresAliens[alienSeleccionado]; textoAlien.style.opacity = 1;
+            } else if (estadoActual === 'TRANSFORMADO') {
+                if (masterControl) {
+                    btnAccion.innerText = 'Cambiar Alien';
+                    btnIzquierda.style.display = 'none'; btnDerecha.style.display = 'none'; textoAlien.style.opacity = 0;
+                } else {
+                    btnAccion.innerText = '...';
+                    btnIzquierda.style.display = 'none'; btnDerecha.style.display = 'none'; textoAlien.style.opacity = 0;
+                }
             } else {
                 btnAccion.innerText = '...';
                 btnIzquierda.style.display = 'none'; btnDerecha.style.display = 'none'; textoAlien.style.opacity = 0;
@@ -1132,12 +1336,19 @@
                         transformVideo.src = videoSrc;
                         transformVideo.play().catch(e => {
                             console.log("Error al reproducir transformación:", e);
-                            setTimeout(iniciarRecarga, 8000); 
+                            clickCountControlMaestro = 0;
+                            actualizarUI();
+                            if (!masterControl) recargaTimeout = setTimeout(iniciarRecarga, 8000); 
                         });
                     }, 150);
 
                     const ocultarVideoTransformacion = () => {
-                        setTimeout(iniciarRecarga, 8000);
+                        clickCountControlMaestro = 0;
+                        actualizarUI();
+                        if (!masterControl) {
+                            recargaTimeout = setTimeout(iniciarRecarga, 8000);
+                        }
+
                         gsap.to(transformVideoContainer, {
                             opacity: 0,
                             duration: 0.5,
@@ -1154,13 +1365,56 @@
 
                     transformVideo.addEventListener('ended', ocultarVideoTransformacion);
                 } else {
-                    setTimeout(iniciarRecarga, 8000); 
+                    clickCountControlMaestro = 0;
+                    actualizarUI();
+                    if (!masterControl) recargaTimeout = setTimeout(iniciarRecarga, 8000); 
                 }
 
                 omniLight.color.setHex(0x39ff14);
                 omniLight.intensity = 15;
                 gsap.to(omniLight, { intensity: 0, duration: 1.5, delay: 0.15 });
 
+            } else if (estadoActual === 'TRANSFORMADO') {
+                if (masterControl) {
+                    isAnimating = true;
+                    reproducirSonido('activar');
+
+                    if (!isLooping) {
+                        reproducirSonido('loopSeleccion');
+                        isLooping = true;
+                    }
+                    
+                    gsap.to(nucleoGroup.position, { y: 2.5, duration: 0.5, ease: "back.out(1.5)" });
+                    
+                    if(modeloUsuario) {
+                        if (botonUsuario) {
+                            gsap.to(botonUsuario.position, {
+                                x: botonUsuario.userData.posInicial.x + 0.03,
+                                y: botonUsuario.userData.posInicial.y - 0.03,
+                                z: botonUsuario.userData.posInicial.z - 0.03,
+                                duration: 0.1, yoyo: true, repeat: 1
+                            });
+                        }
+                        if (dialUsuario) gsap.to(dialUsuario.position, { y: dialUsuario.userData.elevatedY, duration: 0.5, delay: 0.1, ease: "back.out(1.5)" });
+                        if (discoDialUsuario) gsap.to(discoDialUsuario.position, { y: discoDialUsuario.userData.elevatedY, duration: 0.5, delay: 0.1, ease: "back.out(1.5)" });
+                        if (relojArenaVerdeUsuario) gsap.to(relojArenaVerdeUsuario.position, { y: relojArenaVerdeUsuario.userData.elevatedY, duration: 0.5, delay: 0.1, ease: "back.out(1.5)" });
+                        if (object16Usuario) gsap.to(object16Usuario.position, { y: object16Usuario.userData.elevatedY, duration: 0.5, delay: 0.1, ease: "back.out(1.5)" });
+                    }
+
+                    gsap.to(omniLight, { intensity: 1.5, duration: 0.5 });
+                    gsap.to(pantallaMat, { opacity: OpacidadHolograma, duration: 0.5, delay: 0.2, onComplete: () => { 
+                        estadoActual = 'ACTIVO'; 
+                        isAnimating = false; 
+                        actualizarUI(); 
+                    }});
+                } else {
+                    if (alienSeleccionado === 4) {
+                        clickCountControlMaestro++;
+                        if (clickCountControlMaestro >= 10) {
+                            activarControlMaestro(false);
+                        }
+                    }
+                }
             }
         }
 
@@ -1209,7 +1463,6 @@
         const raycaster = new THREE.Raycaster();
         const mouse = new THREE.Vector2();
         window.addEventListener('pointerdown', (e) => {
-            // Ignorar clicks si tocas botones, links, o el panel modal de Patreon
             if(e.target.tagName === 'BUTTON' || e.target.tagName === 'LABEL' || e.target.tagName === 'INPUT' || e.target.closest('a') || e.target.closest('#patreon-modal-overlay')) return;
             
             mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
@@ -1363,4 +1616,3 @@
     </script>
 </body>
 </html>
-
